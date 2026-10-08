@@ -1,0 +1,7 @@
+{"type":"session_meta","payload":{"id":"session-fixture","cwd":"/workspace/project","timestamp":"2026-10-07T10:00:00Z","cli_version":"fixture-version","git":{"commit_hash":"0123456789abcdef"}}}
+{"type":"turn_context","payload":{"model":"fixture-model","effort":"low"}}
+{"type":"event_msg","payload":{"type":"user_message","message":"Update the example."}}
+{"type":"response_item","payload":{"type":"custom_tool_call","call_id":"call-1","name":"exec","input":"{\"cmd\":\"pytest\"}"}}
+{"type":"response_item","payload":{"type":"custom_tool_call_output","call_id":"call-1","output":[{"type":"text","text":"2 passed\\nProcess exited with code 0"}]}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":123,"output_tokens":45,"total_tokens":168},"last_token_usage":{"input_tokens":20,"output_tokens":5,"total_tokens":25}}}}
+{"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}

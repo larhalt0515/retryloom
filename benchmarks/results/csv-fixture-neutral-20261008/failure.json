@@ -1,0 +1,13 @@
+{
+  "confidence": "MEDIUM",
+  "evidence": [
+    "test_failure:event[3]: /opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14 -B -m unittest -v; exit_code=1"
+  ],
+  "id": "9ef4ea7ef191fd08ed57f0a4b1277ecd2d3c77849b5084d819b3cb9174ba0c36",
+  "score": 5,
+  "session_id": "synthetic-csv-evidence",
+  "signals": [
+    "test_failure"
+  ],
+  "summary": "Detected signals: test_failure"
+}

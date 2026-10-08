@@ -1,0 +1,46 @@
+{
+  "audit": {
+    "evidence_hashes": [
+      "f58c52d8446972f7a6d44c004523aead655de55e2a04819ad8e84ff43d95c9d6"
+    ],
+    "evidence_refs": [
+      {
+        "correction_event_ref": 4,
+        "evidence_hash": "f58c52d8446972f7a6d44c004523aead655de55e2a04819ad8e84ff43d95c9d6",
+        "failure_event_ref": 3,
+        "failure_id": "9ef4ea7ef191fd08ed57f0a4b1277ecd2d3c77849b5084d819b3cb9174ba0c36",
+        "session_id": "synthetic-csv-evidence",
+        "success_event_ref": 6
+      }
+    ],
+    "overlap_ratio": 0.0,
+    "reasons": [],
+    "status": "ACCEPT"
+  },
+  "canonical_fingerprint": "c51248cb01c82b9027606311c90ec7424cbed946b3940383585b2069b49f1061",
+  "confidence": 0.5,
+  "evidence_refs": [
+    {
+      "correction_event_ref": 4,
+      "evidence_hash": "f58c52d8446972f7a6d44c004523aead655de55e2a04819ad8e84ff43d95c9d6",
+      "failure_event_ref": 3,
+      "failure_id": "9ef4ea7ef191fd08ed57f0a4b1277ecd2d3c77849b5084d819b3cb9174ba0c36",
+      "session_id": "synthetic-csv-evidence",
+      "success_event_ref": 6
+    }
+  ],
+  "evidence_sessions": [
+    "synthetic-csv-evidence"
+  ],
+  "historical_evidence_fingerprint": "e0b7f10d3a04392a804dfe7c3eae1d085f91c533b019be31c97cdddf140e668e",
+  "id": "6fe95e10cc90a7b92598881819b56c5adcc93eec88d17776e99b7def58d8b1c3",
+  "leak_suspect": false,
+  "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+  "rule": "When a test fails in this repository, inspect the failing check, make a focused correction, and rerun the same check before reporting success.",
+  "scope": "repository",
+  "status": "candidate",
+  "trigger": {
+    "failure_type": "test_failure",
+    "repository": "/private/tmp/reflex-phase11-csv-20261008-run1/repository"
+  }
+}

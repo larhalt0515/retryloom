@@ -1,0 +1,156 @@
+{
+  "allowed_environment_differences": [
+    "per-run isolated state paths",
+    "paired run-index seed"
+  ],
+  "case": {
+    "agent": "synthetic-fixture",
+    "agent_version": "1",
+    "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+    "checks": [
+      {
+        "command": [
+          "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+          "-B",
+          "-m",
+          "unittest",
+          "-v"
+        ],
+        "name": "CSV unittest",
+        "required": true,
+        "timeout_seconds": 10
+      }
+    ],
+    "control_timeout_seconds": null,
+    "id": "synthetic-csv-neutral-v1",
+    "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+    "lesson_id": "6fe95e10cc90a7b92598881819b56c5adcc93eec88d17776e99b7def58d8b1c3",
+    "model": null,
+    "model_settings": {},
+    "reflex_timeout_seconds": null,
+    "repository": "/private/tmp/reflex-phase11-csv-20261008-run1/repository",
+    "runs": 3,
+    "task": "Correct parse_row to handle quoted commas, escaped quotes, and trim field whitespace; verify with unittest.",
+    "timeout_seconds": 10
+  },
+  "commit_provenance_note": "Parent Git commit is not a Reflex release commit; source hashes identify untracked Reflex code.",
+  "evidence_category": "synthetic fixture",
+  "expected_control_success_count": 0,
+  "expected_reflex_success_count": 0,
+  "expected_result": "VALID NEUTRAL RESULT",
+  "frozen_lesson": {
+    "audit": {
+      "evidence_hashes": [
+        "f58c52d8446972f7a6d44c004523aead655de55e2a04819ad8e84ff43d95c9d6"
+      ],
+      "evidence_refs": [
+        {
+          "correction_event_ref": 4,
+          "evidence_hash": "f58c52d8446972f7a6d44c004523aead655de55e2a04819ad8e84ff43d95c9d6",
+          "failure_event_ref": 3,
+          "failure_id": "9ef4ea7ef191fd08ed57f0a4b1277ecd2d3c77849b5084d819b3cb9174ba0c36",
+          "session_id": "synthetic-csv-evidence",
+          "success_event_ref": 6
+        }
+      ],
+      "overlap_ratio": 0.0,
+      "reasons": [],
+      "status": "ACCEPT"
+    },
+    "canonical_fingerprint": "c51248cb01c82b9027606311c90ec7424cbed946b3940383585b2069b49f1061",
+    "confidence": 0.5,
+    "evidence_refs": [
+      {
+        "correction_event_ref": 4,
+        "evidence_hash": "f58c52d8446972f7a6d44c004523aead655de55e2a04819ad8e84ff43d95c9d6",
+        "failure_event_ref": 3,
+        "failure_id": "9ef4ea7ef191fd08ed57f0a4b1277ecd2d3c77849b5084d819b3cb9174ba0c36",
+        "session_id": "synthetic-csv-evidence",
+        "success_event_ref": 6
+      }
+    ],
+    "evidence_sessions": [
+      "synthetic-csv-evidence"
+    ],
+    "historical_evidence_fingerprint": "e0b7f10d3a04392a804dfe7c3eae1d085f91c533b019be31c97cdddf140e668e",
+    "id": "6fe95e10cc90a7b92598881819b56c5adcc93eec88d17776e99b7def58d8b1c3",
+    "leak_suspect": false,
+    "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+    "rule": "When a test fails in this repository, inspect the failing check, make a focused correction, and rerun the same check before reporting success.",
+    "scope": "repository",
+    "status": "candidate",
+    "trigger": {
+      "failure_type": "test_failure",
+      "repository": "/private/tmp/reflex-phase11-csv-20261008-run1/repository"
+    }
+  },
+  "intentional_condition_difference": "exact frozen Lesson injection only",
+  "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+  "live_claude_validation": {
+    "reason": "Equivalent filesystem confinement has not been established; no live Claude execution attempted.",
+    "status": "INFRASTRUCTURE BLOCKED"
+  },
+  "live_codex_validation": {
+    "classification": "validation gap, not Reflex implementation failure",
+    "production_changes_caused_by_failed_smokes": "None",
+    "reason": "Parent sandbox prohibits nested sandbox-exec; installed CLI help does not document authenticated network execution with sufficient filesystem confinement.",
+    "status": "INFRASTRUCTURE BLOCKED"
+  },
+  "live_execution": false,
+  "no_setup_runs_counted": true,
+  "order": [
+    "CONTROL",
+    "CONTROL",
+    "CONTROL",
+    "REFLEX",
+    "REFLEX",
+    "REFLEX"
+  ],
+  "parent_git_commit": "4c74f366ef60b732820a30fb6be7f193e4fa0627",
+  "python_executable": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+  "python_version": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 17.0.0 (clang-1700.6.4.2)]",
+  "reflex_project_tracked": false,
+  "reflex_source_files_sha256": {
+    "src/reflex/__init__.py": "6aab274b0610b2e228a376d386d24deca61dbb4e9c826e074cc25782ebfb8ef9",
+    "src/reflex/adapters/__init__.py": "d1f6db057f51521f2ce4cb08d7e47d32b87d3553c576363273db168f4f100989",
+    "src/reflex/adapters/base.py": "20faf37ae413cf619eaf31c13e88689fb599f98735db82e4dc7169abaea46abf",
+    "src/reflex/adapters/claude.py": "c5c250da5ad9d0936c76a46b0c35a414480bafd2ec2e87ab21defb6b0be9feaa",
+    "src/reflex/adapters/codex.py": "261700aed3f61b69d26852ff1aaced04912f261686db7f2eb8a28cf0ac148ba8",
+    "src/reflex/analysis/__init__.py": "1a486194fb1828ac10a9501c22672942b4ea496eedeea8c944495058a852463b",
+    "src/reflex/analysis/corrections.py": "866185d6e2b9b99874691bd2907fec5c3e0073c5bd05642e90093aa92c78fcdd",
+    "src/reflex/analysis/failures.py": "e944db37131ebb9cc37180434cd50643403ac51546bfe742e0d68ecf85052f82",
+    "src/reflex/analysis/leakage.py": "ad8b96e17a3e37b15fd68ebbf27189b2ef8d52be1b7d4480c73cadf3af55c2f5",
+    "src/reflex/analysis/lessons.py": "2d41b77cea1f91fefd251f35997fa82cbafae1bfa38fddc9450c9ac73c18a02e",
+    "src/reflex/analysis/signals.py": "acc68792c2cd02ece27e2d4eaf7a96c8df2f86fb6be06116926d62f6dabc3d4a",
+    "src/reflex/application.py": "e57abf731e9b970e46d3655f073dd66f4134ef1d96bf88cf6f1e597996af1e66",
+    "src/reflex/config/__init__.py": "5669df4f2a0982af9e98585717309caea667c60e1583cb8db7f8da103de3d79c",
+    "src/reflex/config/loader.py": "0ed51e08afbb0e22f176ab1c47fc16008b5e4096373f314509cda70892c84804",
+    "src/reflex/config/models.py": "2b2f27cb1b4e19563cf326349eb27e844608d25007018945de9a20ade0578c31",
+    "src/reflex/git/__init__.py": "ab236635b8fd428ca966c3dd61621f720e3c25e85de7bf7c65a3c22a93e5c18e",
+    "src/reflex/git/clone.py": "ed039f50416639a997cfcf2f1cbe755e7b91fa994d3ba99be492cb10236dae2d",
+    "src/reflex/git/repository.py": "9faf4eaa8785f5c75979d8e0aa89a874fdb772363110767968fce006316afe10",
+    "src/reflex/main.py": "d710ef31561f35438c670e87b1d7333e505f6d7d3ea405b4a052cde8697d4529",
+    "src/reflex/models.py": "d88c0c66bfbbfdef98656770489d279afb353fa3f60e6ecb8bdf58d9b08ce5bb",
+    "src/reflex/output/__init__.py": "cc76fa7b5970650beb634f17d1ca1d8c8946a197a2bee9d265c639df493e4295",
+    "src/reflex/output/stats.py": "559200fe3e84b8d81d836a0d0e049288315e03d647d14c44b7420a1d10db0920",
+    "src/reflex/replay/__init__.py": "73dbb2174cf6fd362d82ec31fd5bd0669507117069cf5e03474f5da88c63ebb7",
+    "src/reflex/replay/checks.py": "9a983562d451c3e2ed562269a81a040610557bcf41ca7ba034a85d0d2439798e",
+    "src/reflex/replay/engine.py": "357414619e0d2e753ebeadffca9d9ac725597c8dbb9f777d0bb0d82c284c09ee",
+    "src/reflex/replay/evaluator.py": "c994cead1188d92c260680b1288e033923d33a0327f1db769442c4d08a49f11c",
+    "src/reflex/replay/injection.py": "6f185f259de474337cff98b702fa3fa66424962bdd7a338b0425a6a5d0a38cc8",
+    "src/reflex/replay/isolation.py": "2fe33fc7ba5528075f84d7de804e3020afd4c309f1b890d85d3548863e6347d2",
+    "src/reflex/replay/models.py": "887f3b12e839cb5b9b70a1c47f562e7768b7cffcda6c1d6d66127c331265637e",
+    "src/reflex/replay/runner.py": "5338793832b5853e860298de4b984ecd3b201a0aca0153c781277ec67b7d15c6",
+    "src/reflex/replay/subprocess.py": "95a3776f932ad8811510c5d860a1952ea6d7cadb504cb586300f70185ebb581f",
+    "src/reflex/storage/__init__.py": "4aeabaff761b8ebaffa86e91656c7951a8a82e93a7e9df99b3f830290f3dbf19",
+    "src/reflex/storage/database.py": "a054d33ceb4ef00e3aa259d21d7ba81ed3f3a6a5475996712bb0bfb1280ca618",
+    "src/reflex/storage/lifecycle.py": "928359689183399d9c4d03edc63170e82d7ac336b4f17d9883e9f9b335c8d7a0",
+    "src/reflex/storage/repository.py": "b5a447d21ee5dee7f62f3e72687ecf051a50e2b54822b6b168ee2a0c996f9e50",
+    "src/reflex/storage/schema.py": "cedf1804a35a4ae44967c1dc68d7eaf213c74f2f5cccfbc2f8864bd10ec43877"
+  },
+  "reflex_source_tree_hash": "23f82045ca70886059e8b2bd28a9cb1d747688eaa25c7fb14d3263176e69c272",
+  "reflex_version": "0.1.0",
+  "runner_code_hash": "e0981a1d151395c829c38d086c2d25232886f1bbcefd0edebf1b407996b371a6",
+  "runner_interprets_lesson": false,
+  "script_hash": "e8574d27033cd8115626285e958d921232dc59fd9056abd396e510a25dc4f007"
+}

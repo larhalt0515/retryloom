@@ -1,0 +1,561 @@
+{
+  "case_id": "synthetic-csv-neutral-v1",
+  "id": "89e88d2e-6db9-4da8-8414-9b0186ba972f",
+  "metadata": {
+    "administrative_database_paths": [
+      ".reflex/reflex.db",
+      ".reflex/reflex.db-wal",
+      ".reflex/reflex.db-shm",
+      ".reflex/reflex.db-journal"
+    ],
+    "agent_version_parity_verified": true,
+    "auth": "isolated state; no host credentials copied",
+    "cleanup_warning": false,
+    "efficiency_usable": true,
+    "isolation": "state paths and Git history; not a hostile-code sandbox",
+    "lint_scope": "mechanical_lines_and_fences_only",
+    "manifest": {
+      "agent": "synthetic-fixture",
+      "agent_version": "1",
+      "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+      "checks": [
+        {
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "name": "CSV unittest",
+          "required": true,
+          "timeout_seconds": 10
+        }
+      ],
+      "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+      "lesson_id": "6fe95e10cc90a7b92598881819b56c5adcc93eec88d17776e99b7def58d8b1c3",
+      "model": null,
+      "model_settings": {},
+      "requested_base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+      "runs": 3,
+      "task": "Correct parse_row to handle quoted commas, escaped quotes, and trim field whitespace; verify with unittest.",
+      "timeout_seconds": 10
+    },
+    "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+    "model_parity_verified": false,
+    "observed_agent_metadata": {
+      "agent": "synthetic-fixture",
+      "agent_version": "1"
+    },
+    "resolved_base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+    "runner": {
+      "agent": "synthetic-fixture",
+      "agent_version": "1",
+      "model_settings": {},
+      "type": "__main__.SyntheticRunner"
+    }
+  },
+  "reason": "eligible paired replay completed; improvement has not been evaluated",
+  "runs": [
+    {
+      "checks": [
+        {
+          "cleanup_error": null,
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "elapsed_seconds": 0.25435529206879437,
+          "error": null,
+          "exit_code": 1,
+          "name": "CSV unittest",
+          "output_truncated": false,
+          "required": true,
+          "stderr": "test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes) ... FAIL\ntest_quoted_comma (test_parser.CsvChecks.test_quoted_comma) ... FAIL\ntest_whitespace (test_parser.CsvChecks.test_whitespace) ... ok\n\n======================================================================\nFAIL: test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-usbwjxb_/repository/test_parser.py\", line 8, in test_escaped_quotes\n    self.assertEqual(parse_row('\"say \"\"hi\"\"\",end'), ['say \"hi\"', 'end'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"say \"\"hi\"\"\"', 'end'] != ['say \"hi\"', 'end']\n\nFirst differing element 0:\n'\"say \"\"hi\"\"\"'\n'say \"hi\"'\n\n- ['\"say \"\"hi\"\"\"', 'end']\n?   -    -    --\n\n+ ['say \"hi\"', 'end']\n\n======================================================================\nFAIL: test_quoted_comma (test_parser.CsvChecks.test_quoted_comma)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-usbwjxb_/repository/test_parser.py\", line 6, in test_quoted_comma\n    self.assertEqual(parse_row('\"one,two\",three'), ['one,two', 'three'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"one', 'two\"', 'three'] != ['one,two', 'three']\n\nFirst differing element 0:\n'\"one'\n'one,two'\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n'three'\n\n- ['\"one', 'two\"', 'three']\n?   -   - --   -\n\n+ ['one,two', 'three']\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2)\n",
+          "stdout": "",
+          "success": false,
+          "timed_out": false
+        }
+      ],
+      "condition": "CONTROL",
+      "id": "a0ad3db8-1593-4b5d-88ad-15d2901015a5",
+      "metadata": {
+        "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+        "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+        "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+        "tool_environment_keys": [
+          "CODEX_HOME",
+          "GIT_CONFIG_GLOBAL",
+          "GIT_CONFIG_NOSYSTEM",
+          "GIT_NO_REPLACE_OBJECTS",
+          "GIT_OPTIONAL_LOCKS",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONHASHSEED",
+          "PYTHONPYCACHEPREFIX",
+          "REFLEX_RUN_SEED",
+          "TEMP",
+          "TMP",
+          "TMPDIR",
+          "XDG_CACHE_HOME",
+          "XDG_CONFIG_HOME",
+          "XDG_DATA_HOME",
+          "XDG_STATE_HOME"
+        ],
+        "total_elapsed_seconds": 0.5327619999879971
+      },
+      "result": {
+        "agent": "synthetic-fixture",
+        "agent_error": null,
+        "agent_version": "1",
+        "cleanup_error": null,
+        "efficiency_usable": true,
+        "elapsed_seconds": 0.10172454104758799,
+        "exit_code": 0,
+        "files_changed": null,
+        "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+        "lines_added": null,
+        "lines_removed": null,
+        "model": null,
+        "output_truncated": false,
+        "stderr": "",
+        "stdout": "Synthetic fixture: applied fixed whitespace-only edit; no task-success claim.\n",
+        "success": false,
+        "timed_out": false,
+        "token_input": null,
+        "token_output": null,
+        "token_total": null,
+        "tool_calls": null
+      },
+      "run_number": 1,
+      "seed": 0,
+      "status": "REQUIRED_CHECK_FAILED",
+      "statuses": [
+        "REQUIRED_CHECK_FAILED"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "cleanup_error": null,
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "elapsed_seconds": 0.2538954579504207,
+          "error": null,
+          "exit_code": 1,
+          "name": "CSV unittest",
+          "output_truncated": false,
+          "required": true,
+          "stderr": "test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes) ... FAIL\ntest_quoted_comma (test_parser.CsvChecks.test_quoted_comma) ... FAIL\ntest_whitespace (test_parser.CsvChecks.test_whitespace) ... ok\n\n======================================================================\nFAIL: test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-09clhu_a/repository/test_parser.py\", line 8, in test_escaped_quotes\n    self.assertEqual(parse_row('\"say \"\"hi\"\"\",end'), ['say \"hi\"', 'end'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"say \"\"hi\"\"\"', 'end'] != ['say \"hi\"', 'end']\n\nFirst differing element 0:\n'\"say \"\"hi\"\"\"'\n'say \"hi\"'\n\n- ['\"say \"\"hi\"\"\"', 'end']\n?   -    -    --\n\n+ ['say \"hi\"', 'end']\n\n======================================================================\nFAIL: test_quoted_comma (test_parser.CsvChecks.test_quoted_comma)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-09clhu_a/repository/test_parser.py\", line 6, in test_quoted_comma\n    self.assertEqual(parse_row('\"one,two\",three'), ['one,two', 'three'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"one', 'two\"', 'three'] != ['one,two', 'three']\n\nFirst differing element 0:\n'\"one'\n'one,two'\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n'three'\n\n- ['\"one', 'two\"', 'three']\n?   -   - --   -\n\n+ ['one,two', 'three']\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2)\n",
+          "stdout": "",
+          "success": false,
+          "timed_out": false
+        }
+      ],
+      "condition": "CONTROL",
+      "id": "19ad29ab-fe1c-47ea-ad2b-beee82f068b3",
+      "metadata": {
+        "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+        "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+        "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+        "tool_environment_keys": [
+          "CODEX_HOME",
+          "GIT_CONFIG_GLOBAL",
+          "GIT_CONFIG_NOSYSTEM",
+          "GIT_NO_REPLACE_OBJECTS",
+          "GIT_OPTIONAL_LOCKS",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONHASHSEED",
+          "PYTHONPYCACHEPREFIX",
+          "REFLEX_RUN_SEED",
+          "TEMP",
+          "TMP",
+          "TMPDIR",
+          "XDG_CACHE_HOME",
+          "XDG_CONFIG_HOME",
+          "XDG_DATA_HOME",
+          "XDG_STATE_HOME"
+        ],
+        "total_elapsed_seconds": 0.5365824999753386
+      },
+      "result": {
+        "agent": "synthetic-fixture",
+        "agent_error": null,
+        "agent_version": "1",
+        "cleanup_error": null,
+        "efficiency_usable": true,
+        "elapsed_seconds": 0.10263049998320639,
+        "exit_code": 0,
+        "files_changed": null,
+        "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+        "lines_added": null,
+        "lines_removed": null,
+        "model": null,
+        "output_truncated": false,
+        "stderr": "",
+        "stdout": "Synthetic fixture: applied fixed whitespace-only edit; no task-success claim.\n",
+        "success": false,
+        "timed_out": false,
+        "token_input": null,
+        "token_output": null,
+        "token_total": null,
+        "tool_calls": null
+      },
+      "run_number": 2,
+      "seed": 1,
+      "status": "REQUIRED_CHECK_FAILED",
+      "statuses": [
+        "REQUIRED_CHECK_FAILED"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "cleanup_error": null,
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "elapsed_seconds": 0.2536328750429675,
+          "error": null,
+          "exit_code": 1,
+          "name": "CSV unittest",
+          "output_truncated": false,
+          "required": true,
+          "stderr": "test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes) ... FAIL\ntest_quoted_comma (test_parser.CsvChecks.test_quoted_comma) ... FAIL\ntest_whitespace (test_parser.CsvChecks.test_whitespace) ... ok\n\n======================================================================\nFAIL: test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-m96a45w_/repository/test_parser.py\", line 8, in test_escaped_quotes\n    self.assertEqual(parse_row('\"say \"\"hi\"\"\",end'), ['say \"hi\"', 'end'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"say \"\"hi\"\"\"', 'end'] != ['say \"hi\"', 'end']\n\nFirst differing element 0:\n'\"say \"\"hi\"\"\"'\n'say \"hi\"'\n\n- ['\"say \"\"hi\"\"\"', 'end']\n?   -    -    --\n\n+ ['say \"hi\"', 'end']\n\n======================================================================\nFAIL: test_quoted_comma (test_parser.CsvChecks.test_quoted_comma)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-m96a45w_/repository/test_parser.py\", line 6, in test_quoted_comma\n    self.assertEqual(parse_row('\"one,two\",three'), ['one,two', 'three'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"one', 'two\"', 'three'] != ['one,two', 'three']\n\nFirst differing element 0:\n'\"one'\n'one,two'\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n'three'\n\n- ['\"one', 'two\"', 'three']\n?   -   - --   -\n\n+ ['one,two', 'three']\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2)\n",
+          "stdout": "",
+          "success": false,
+          "timed_out": false
+        }
+      ],
+      "condition": "CONTROL",
+      "id": "0c4dfc7b-31d1-4d9c-8720-f0c86134d512",
+      "metadata": {
+        "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+        "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+        "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+        "tool_environment_keys": [
+          "CODEX_HOME",
+          "GIT_CONFIG_GLOBAL",
+          "GIT_CONFIG_NOSYSTEM",
+          "GIT_NO_REPLACE_OBJECTS",
+          "GIT_OPTIONAL_LOCKS",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONHASHSEED",
+          "PYTHONPYCACHEPREFIX",
+          "REFLEX_RUN_SEED",
+          "TEMP",
+          "TMP",
+          "TMPDIR",
+          "XDG_CACHE_HOME",
+          "XDG_CONFIG_HOME",
+          "XDG_DATA_HOME",
+          "XDG_STATE_HOME"
+        ],
+        "total_elapsed_seconds": 0.5497068340191618
+      },
+      "result": {
+        "agent": "synthetic-fixture",
+        "agent_error": null,
+        "agent_version": "1",
+        "cleanup_error": null,
+        "efficiency_usable": true,
+        "elapsed_seconds": 0.10321695893071592,
+        "exit_code": 0,
+        "files_changed": null,
+        "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+        "lines_added": null,
+        "lines_removed": null,
+        "model": null,
+        "output_truncated": false,
+        "stderr": "",
+        "stdout": "Synthetic fixture: applied fixed whitespace-only edit; no task-success claim.\n",
+        "success": false,
+        "timed_out": false,
+        "token_input": null,
+        "token_output": null,
+        "token_total": null,
+        "tool_calls": null
+      },
+      "run_number": 3,
+      "seed": 2,
+      "status": "REQUIRED_CHECK_FAILED",
+      "statuses": [
+        "REQUIRED_CHECK_FAILED"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "cleanup_error": null,
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "elapsed_seconds": 0.253160291002132,
+          "error": null,
+          "exit_code": 1,
+          "name": "CSV unittest",
+          "output_truncated": false,
+          "required": true,
+          "stderr": "test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes) ... FAIL\ntest_quoted_comma (test_parser.CsvChecks.test_quoted_comma) ... FAIL\ntest_whitespace (test_parser.CsvChecks.test_whitespace) ... ok\n\n======================================================================\nFAIL: test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-j3840yj8/repository/test_parser.py\", line 8, in test_escaped_quotes\n    self.assertEqual(parse_row('\"say \"\"hi\"\"\",end'), ['say \"hi\"', 'end'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"say \"\"hi\"\"\"', 'end'] != ['say \"hi\"', 'end']\n\nFirst differing element 0:\n'\"say \"\"hi\"\"\"'\n'say \"hi\"'\n\n- ['\"say \"\"hi\"\"\"', 'end']\n?   -    -    --\n\n+ ['say \"hi\"', 'end']\n\n======================================================================\nFAIL: test_quoted_comma (test_parser.CsvChecks.test_quoted_comma)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-j3840yj8/repository/test_parser.py\", line 6, in test_quoted_comma\n    self.assertEqual(parse_row('\"one,two\",three'), ['one,two', 'three'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"one', 'two\"', 'three'] != ['one,two', 'three']\n\nFirst differing element 0:\n'\"one'\n'one,two'\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n'three'\n\n- ['\"one', 'two\"', 'three']\n?   -   - --   -\n\n+ ['one,two', 'three']\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2)\n",
+          "stdout": "",
+          "success": false,
+          "timed_out": false
+        }
+      ],
+      "condition": "REFLEX",
+      "id": "2d76d483-171d-4c17-b183-9d5a7e6aaa56",
+      "metadata": {
+        "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+        "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+        "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+        "tool_environment_keys": [
+          "CODEX_HOME",
+          "GIT_CONFIG_GLOBAL",
+          "GIT_CONFIG_NOSYSTEM",
+          "GIT_NO_REPLACE_OBJECTS",
+          "GIT_OPTIONAL_LOCKS",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONHASHSEED",
+          "PYTHONPYCACHEPREFIX",
+          "REFLEX_RUN_SEED",
+          "TEMP",
+          "TMP",
+          "TMPDIR",
+          "XDG_CACHE_HOME",
+          "XDG_CONFIG_HOME",
+          "XDG_DATA_HOME",
+          "XDG_STATE_HOME"
+        ],
+        "total_elapsed_seconds": 0.5305268749361858
+      },
+      "result": {
+        "agent": "synthetic-fixture",
+        "agent_error": null,
+        "agent_version": "1",
+        "cleanup_error": null,
+        "efficiency_usable": true,
+        "elapsed_seconds": 0.10323516605421901,
+        "exit_code": 0,
+        "files_changed": null,
+        "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+        "lines_added": null,
+        "lines_removed": null,
+        "model": null,
+        "output_truncated": false,
+        "stderr": "",
+        "stdout": "Synthetic fixture: applied fixed whitespace-only edit; no task-success claim.\n",
+        "success": false,
+        "timed_out": false,
+        "token_input": null,
+        "token_output": null,
+        "token_total": null,
+        "tool_calls": null
+      },
+      "run_number": 1,
+      "seed": 0,
+      "status": "REQUIRED_CHECK_FAILED",
+      "statuses": [
+        "REQUIRED_CHECK_FAILED"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "cleanup_error": null,
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "elapsed_seconds": 0.2553244580049068,
+          "error": null,
+          "exit_code": 1,
+          "name": "CSV unittest",
+          "output_truncated": false,
+          "required": true,
+          "stderr": "test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes) ... FAIL\ntest_quoted_comma (test_parser.CsvChecks.test_quoted_comma) ... FAIL\ntest_whitespace (test_parser.CsvChecks.test_whitespace) ... ok\n\n======================================================================\nFAIL: test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-5hfnf382/repository/test_parser.py\", line 8, in test_escaped_quotes\n    self.assertEqual(parse_row('\"say \"\"hi\"\"\",end'), ['say \"hi\"', 'end'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"say \"\"hi\"\"\"', 'end'] != ['say \"hi\"', 'end']\n\nFirst differing element 0:\n'\"say \"\"hi\"\"\"'\n'say \"hi\"'\n\n- ['\"say \"\"hi\"\"\"', 'end']\n?   -    -    --\n\n+ ['say \"hi\"', 'end']\n\n======================================================================\nFAIL: test_quoted_comma (test_parser.CsvChecks.test_quoted_comma)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-5hfnf382/repository/test_parser.py\", line 6, in test_quoted_comma\n    self.assertEqual(parse_row('\"one,two\",three'), ['one,two', 'three'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"one', 'two\"', 'three'] != ['one,two', 'three']\n\nFirst differing element 0:\n'\"one'\n'one,two'\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n'three'\n\n- ['\"one', 'two\"', 'three']\n?   -   - --   -\n\n+ ['one,two', 'three']\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2)\n",
+          "stdout": "",
+          "success": false,
+          "timed_out": false
+        }
+      ],
+      "condition": "REFLEX",
+      "id": "6450f34d-6127-4751-a90d-0c13e83c5293",
+      "metadata": {
+        "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+        "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+        "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+        "tool_environment_keys": [
+          "CODEX_HOME",
+          "GIT_CONFIG_GLOBAL",
+          "GIT_CONFIG_NOSYSTEM",
+          "GIT_NO_REPLACE_OBJECTS",
+          "GIT_OPTIONAL_LOCKS",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONHASHSEED",
+          "PYTHONPYCACHEPREFIX",
+          "REFLEX_RUN_SEED",
+          "TEMP",
+          "TMP",
+          "TMPDIR",
+          "XDG_CACHE_HOME",
+          "XDG_CONFIG_HOME",
+          "XDG_DATA_HOME",
+          "XDG_STATE_HOME"
+        ],
+        "total_elapsed_seconds": 0.5349625420058146
+      },
+      "result": {
+        "agent": "synthetic-fixture",
+        "agent_error": null,
+        "agent_version": "1",
+        "cleanup_error": null,
+        "efficiency_usable": true,
+        "elapsed_seconds": 0.10222091700416058,
+        "exit_code": 0,
+        "files_changed": null,
+        "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+        "lines_added": null,
+        "lines_removed": null,
+        "model": null,
+        "output_truncated": false,
+        "stderr": "",
+        "stdout": "Synthetic fixture: applied fixed whitespace-only edit; no task-success claim.\n",
+        "success": false,
+        "timed_out": false,
+        "token_input": null,
+        "token_output": null,
+        "token_total": null,
+        "tool_calls": null
+      },
+      "run_number": 2,
+      "seed": 1,
+      "status": "REQUIRED_CHECK_FAILED",
+      "statuses": [
+        "REQUIRED_CHECK_FAILED"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "cleanup_error": null,
+          "command": [
+            "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "-B",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "elapsed_seconds": 0.25185779097955674,
+          "error": null,
+          "exit_code": 1,
+          "name": "CSV unittest",
+          "output_truncated": false,
+          "required": true,
+          "stderr": "test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes) ... FAIL\ntest_quoted_comma (test_parser.CsvChecks.test_quoted_comma) ... FAIL\ntest_whitespace (test_parser.CsvChecks.test_whitespace) ... ok\n\n======================================================================\nFAIL: test_escaped_quotes (test_parser.CsvChecks.test_escaped_quotes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-sw4yjt61/repository/test_parser.py\", line 8, in test_escaped_quotes\n    self.assertEqual(parse_row('\"say \"\"hi\"\"\",end'), ['say \"hi\"', 'end'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"say \"\"hi\"\"\"', 'end'] != ['say \"hi\"', 'end']\n\nFirst differing element 0:\n'\"say \"\"hi\"\"\"'\n'say \"hi\"'\n\n- ['\"say \"\"hi\"\"\"', 'end']\n?   -    -    --\n\n+ ['say \"hi\"', 'end']\n\n======================================================================\nFAIL: test_quoted_comma (test_parser.CsvChecks.test_quoted_comma)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/reflex-phase11-csv-20261008-run1/replay-temporary/reflex-replay-sw4yjt61/repository/test_parser.py\", line 6, in test_quoted_comma\n    self.assertEqual(parse_row('\"one,two\",three'), ['one,two', 'three'])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: ['\"one', 'two\"', 'three'] != ['one,two', 'three']\n\nFirst differing element 0:\n'\"one'\n'one,two'\n\nFirst list contains 1 additional elements.\nFirst extra element 2:\n'three'\n\n- ['\"one', 'two\"', 'three']\n?   -   - --   -\n\n+ ['one,two', 'three']\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2)\n",
+          "stdout": "",
+          "success": false,
+          "timed_out": false
+        }
+      ],
+      "condition": "REFLEX",
+      "id": "ce930610-2e93-4a5c-93b9-98ac33d3dc8d",
+      "metadata": {
+        "base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+        "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+        "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+        "tool_environment_keys": [
+          "CODEX_HOME",
+          "GIT_CONFIG_GLOBAL",
+          "GIT_CONFIG_NOSYSTEM",
+          "GIT_NO_REPLACE_OBJECTS",
+          "GIT_OPTIONAL_LOCKS",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONHASHSEED",
+          "PYTHONPYCACHEPREFIX",
+          "REFLEX_RUN_SEED",
+          "TEMP",
+          "TMP",
+          "TMPDIR",
+          "XDG_CACHE_HOME",
+          "XDG_CONFIG_HOME",
+          "XDG_DATA_HOME",
+          "XDG_STATE_HOME"
+        ],
+        "total_elapsed_seconds": 0.5387568339938298
+      },
+      "result": {
+        "agent": "synthetic-fixture",
+        "agent_error": null,
+        "agent_version": "1",
+        "cleanup_error": null,
+        "efficiency_usable": true,
+        "elapsed_seconds": 0.10541712504345924,
+        "exit_code": 0,
+        "files_changed": null,
+        "lesson_hash": "5aac97fdcf1d7df3b51e419d9191751c6bf6ce7b064e3bcbff05b19c52afe509",
+        "lines_added": null,
+        "lines_removed": null,
+        "model": null,
+        "output_truncated": false,
+        "stderr": "",
+        "stdout": "Synthetic fixture: applied fixed whitespace-only edit; no task-success claim.\n",
+        "success": false,
+        "timed_out": false,
+        "token_input": null,
+        "token_output": null,
+        "token_total": null,
+        "tool_calls": null
+      },
+      "run_number": 3,
+      "seed": 2,
+      "status": "REQUIRED_CHECK_FAILED",
+      "statuses": [
+        "REQUIRED_CHECK_FAILED"
+      ]
+    }
+  ],
+  "status": "COMPLETED",
+  "warnings": []
+}

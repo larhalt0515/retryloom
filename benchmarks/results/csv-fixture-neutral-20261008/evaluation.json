@@ -1,0 +1,36 @@
+{
+  "condition": null,
+  "control_median_tokens": null,
+  "control_success_count": 0,
+  "evidence": {
+    "case_id": "synthetic-csv-neutral-v1",
+    "efficiency_available": false,
+    "efficiency_unavailable_reason": "a planned run has missing or negative token totals",
+    "limitations": [
+      "model parity is unknown; available metadata has no mismatch"
+    ],
+    "manifest_hash": "4db27e587d5c4324212176011e05b9459e85259abac23d703238be4158425eed",
+    "optional_check_regressions": [],
+    "report_id": "89e88d2e-6db9-4da8-8414-9b0186ba972f",
+    "required_check_regressions": [],
+    "resolved_base_commit": "08f8f4c949d280984cf1b17551ae36f2df2f8020",
+    "run_ids": {
+      "CONTROL": [
+        "a0ad3db8-1593-4b5d-88ad-15d2901015a5",
+        "19ad29ab-fe1c-47ea-ad2b-beee82f068b3",
+        "0c4dfc7b-31d1-4d9c-8720-f0c86134d512"
+      ],
+      "REFLEX": [
+        "2d76d483-171d-4c17-b183-9d5a7e6aaa56",
+        "6450f34d-6127-4751-a90d-0c13e83c5293",
+        "ce930610-2e93-4a5c-93b9-98ac33d3dc8d"
+      ]
+    }
+  },
+  "reason": "neither success improvement nor eligible token improvement was demonstrated",
+  "reflex_median_tokens": null,
+  "reflex_success_count": 0,
+  "required_check_regression": false,
+  "status": "rejected",
+  "token_reduction_ratio": null
+}

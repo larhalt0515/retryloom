@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.reflex/
+dist/
+*.egg-info/
+build/
+.env
+.env.*
+!.env.example
+auth.json
+.DS_Store

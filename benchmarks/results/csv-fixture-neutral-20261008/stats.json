@@ -1,0 +1,39 @@
+{
+  "arms": {
+    "CONTROL": {
+      "elapsed_seconds_available_count": 3,
+      "median_elapsed_seconds": 0.10263049998320639,
+      "median_token_total": null,
+      "median_tool_calls": null,
+      "run_count": 3,
+      "success_count": 0,
+      "success_rate": 0.0,
+      "token_total_available_count": 0,
+      "tool_calls_available_count": 0
+    },
+    "REFLEX": {
+      "elapsed_seconds_available_count": 3,
+      "median_elapsed_seconds": 0.10323516605421901,
+      "median_token_total": null,
+      "median_tool_calls": null,
+      "run_count": 3,
+      "success_count": 0,
+      "success_rate": 0.0,
+      "token_total_available_count": 0,
+      "tool_calls_available_count": 0
+    }
+  },
+  "failures_detected": 1,
+  "improvement_confirmed": 0,
+  "invalid_comparisons": 0,
+  "lessons": {
+    "applied": 0,
+    "candidate": 1,
+    "rejected": 0,
+    "replay_confirmed": 0
+  },
+  "replay_comparisons": 1,
+  "sessions_analyzed": 1,
+  "unevaluated_comparisons": 0,
+  "valid_comparisons": 1
+}

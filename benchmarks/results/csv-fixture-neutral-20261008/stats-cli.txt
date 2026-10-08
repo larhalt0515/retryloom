@@ -1,0 +1,19 @@
+Sessions analyzed: 1
+Failures detected: 1
+Lessons candidate: 1
+Lessons replay_confirmed: 0
+Lessons rejected: 0
+Lessons applied: 0
+Replay comparisons: 1
+Valid comparisons: 1
+Invalid comparisons: 0
+Unevaluated comparisons: 0
+Improvement confirmed: 0
+CONTROL success: 0/3 (0.0%)
+CONTROL median tokens: N/A (available: 0)
+CONTROL median tool calls: N/A (available: 0)
+CONTROL median elapsed seconds: 0.10263049998320639 (available: 3)
+REFLEX success: 0/3 (0.0%)
+REFLEX median tokens: N/A (available: 0)
+REFLEX median tool calls: N/A (available: 0)
+REFLEX median elapsed seconds: 0.10323516605421901 (available: 3)

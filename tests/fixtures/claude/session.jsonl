@@ -1,0 +1,5 @@
+{"type":"user","sessionId":"synthetic-claude-fixture","timestamp":"2026-01-01T00:00:00Z","cwd":"/workspace/example","version":"1.0-fixture","message":{"role":"user","content":"Repair the example parser."}}
+{"type":"assistant","sessionId":"synthetic-claude-fixture","timestamp":"2026-01-01T00:00:01Z","message":{"id":"fixture-message","model":"claude-fixture","usage":{"input_tokens":10,"output_tokens":2},"content":[{"type":"tool_use","id":"fixture-call","name":"Bash","input":{"command":"pytest"}}]}}
+{"type":"user","sessionId":"synthetic-claude-fixture","timestamp":"2026-01-01T00:00:02Z","message":{"content":[{"type":"tool_result","tool_use_id":"fixture-call","is_error":true,"content":"Exit code 1\n1 failed"}]}}
+{"type":"user","sessionId":"synthetic-claude-fixture","timestamp":"2026-01-01T00:00:03Z","message":{"content":"Please fix the missing validation instead of ignoring it."}}
+{"type":"result","sessionId":"synthetic-claude-fixture","timestamp":"2026-01-01T00:00:04Z","is_error":true}
