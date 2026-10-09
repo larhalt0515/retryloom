@@ -5,8 +5,8 @@ import stat
 
 import pytest
 
-import reflex.application as application
-from reflex.application import commit_apply, preview_apply
+import retryloom.application as application
+from retryloom.application import commit_apply, preview_apply
 from test_apply import eligible
 from test_apply_review import assert_unapplied
 
@@ -89,7 +89,7 @@ def test_stale_target_during_apply_preparation(eligible, monkeypatch, tmp_path, 
     assert target_state(target) == observed[0]
     assert outside.read_bytes() == b'Outside content'
     assert_unapplied(db, lesson)
-    assert not list(root.glob('.reflex-apply-*'))
+    assert not list(root.glob('.retryloom-apply-*'))
 
 
 @pytest.mark.parametrize('kind', ['modified', 'replaced', 'same_bytes_replaced', 'deleted', 'symlink', 'directory'])
@@ -116,7 +116,7 @@ def test_stale_target_during_rollback_preparation(eligible, monkeypatch, tmp_pat
     assert target_state(target) == observed[0]
     assert outside.read_bytes() == b'Outside content'
     assert_unapplied(db, lesson)
-    assert not list(root.glob('.reflex-apply-*'))
+    assert not list(root.glob('.retryloom-apply-*'))
 
 
 def test_same_bytes_replacement_before_rollback_is_not_apply_owned(eligible, monkeypatch):

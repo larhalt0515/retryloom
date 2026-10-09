@@ -2,9 +2,9 @@
 import json
 import pytest
 
-from reflex.adapters.claude import ClaudeAdapter
-from reflex.models import Session
-from reflex.analysis.failures import detect_failure
+from retryloom.adapters.claude import ClaudeAdapter
+from retryloom.models import Session
+from retryloom.analysis.failures import detect_failure
 
 
 def transcript(tmp_path, records):
@@ -80,7 +80,7 @@ def test_non_shell_result_text_is_not_shell_exit_evidence(tmp_path):
 
 
 def test_observed_edit_data_preserves_correction_sequence(tmp_path):
-    from reflex.analysis.corrections import extract_corrections
+    from retryloom.analysis.corrections import extract_corrections
 
     records = [
         record("user", "Repair the failing tests."),

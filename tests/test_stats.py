@@ -5,10 +5,10 @@ import sqlite3
 
 import pytest
 
-from reflex.output.stats import collect_stats
-from reflex.replay.evaluator import evaluate
-from reflex.storage.database import connect
-from reflex.storage.repository import save_evaluation, save_replay
+from retryloom.output.stats import collect_stats
+from retryloom.replay.evaluator import evaluate
+from retryloom.storage.database import connect
+from retryloom.storage.repository import save_evaluation, save_replay
 from test_evaluation_storage import recorded_report, saved_report
 
 

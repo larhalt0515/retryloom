@@ -4,8 +4,8 @@ import sqlite3
 
 import pytest
 
-from reflex.application import preview_apply, commit_apply
-from reflex.storage.lifecycle import load_lesson_state
+from retryloom.application import preview_apply, commit_apply
+from retryloom.storage.lifecycle import load_lesson_state
 from test_apply import eligible
 
 
@@ -69,31 +69,31 @@ def test_sqlite_commit_failure_restores_file_and_status(eligible):
 
 def test_failed_new_skills_apply_removes_created_empty_directories(eligible, monkeypatch):
     db, root, lesson = eligible
-    proposal = preview_apply(db, root, lesson.id, ".reflex/skills/")
+    proposal = preview_apply(db, root, lesson.id, ".retryloom/skills/")
 
     def fail(*args):
         raise OSError("injected write failure")
 
-    monkeypatch.setattr("reflex.application._replace_at", fail)
+    monkeypatch.setattr("retryloom.application._replace_at", fail)
     with pytest.raises(OSError):
         commit_apply(db, proposal, True)
-    assert not (root / ".reflex").exists()
+    assert not (root / ".retryloom").exists()
     assert_unapplied(db, lesson)
 
 
 def test_detached_parent_with_copied_bytes_is_not_success(eligible, monkeypatch):
-    import reflex.application as module
+    import retryloom.application as module
 
     db, root, lesson = eligible
-    (root / ".reflex/skills").mkdir(parents=True)
-    proposal = preview_apply(db, root, lesson.id, ".reflex/skills/")
+    (root / ".retryloom/skills").mkdir(parents=True)
+    proposal = preview_apply(db, root, lesson.id, ".retryloom/skills/")
     original = module._replace_at
 
     def replace_then_detach(fd, name, content, mode, *guard):
         original(fd, name, content, mode, *guard)
-        (root / ".reflex/skills").rename(root / ".reflex/detached")
-        (root / ".reflex/skills").mkdir()
-        (root / ".reflex/skills" / name).write_bytes(content)
+        (root / ".retryloom/skills").rename(root / ".retryloom/detached")
+        (root / ".retryloom/skills").mkdir()
+        (root / ".retryloom/skills" / name).write_bytes(content)
 
     monkeypatch.setattr(module, "_replace_at", replace_then_detach)
     with pytest.raises((ValueError, RuntimeError)):

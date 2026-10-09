@@ -9,12 +9,12 @@ import sys
 import pytest
 from pydantic import ValidationError
 
-from reflex.git.repository import repository_state
-from reflex.replay.engine import ReplayEngine
-from reflex.replay.injection import FrozenLesson
-from reflex.replay.models import ReplayCase, ReplayCheck, RunResult
-from reflex.replay.runner import CodexRunner
-from reflex.storage.database import connect
+from retryloom.git.repository import repository_state
+from retryloom.replay.engine import ReplayEngine
+from retryloom.replay.injection import FrozenLesson
+from retryloom.replay.models import ReplayCase, ReplayCheck, RunResult
+from retryloom.replay.runner import CodexRunner
+from retryloom.storage.database import connect
 
 
 def git(root, *args):
@@ -37,7 +37,7 @@ def replay_fixture(tmp_path):
     (source / "tracked.txt").write_text("unstaged\n")
     (source / "untracked.txt").write_text("original untracked\n")
     lesson = FrozenLesson.freeze("Run relevant checks after making a change.")
-    database = connect(tmp_path / "reflex.db")
+    database = connect(tmp_path / "retryloom.db")
     database.execute(
         "INSERT INTO lessons(id,scope,trigger_json,rule,evidence_sessions_json,confidence,status,lesson_hash,leak_suspect) VALUES (?,?,?,?,?,?,?,?,?)",
         ("lesson-1", "repository", "{}", lesson.text, "[]", 0.5, "candidate", lesson.lesson_hash, 0),
@@ -181,7 +181,7 @@ def test_hash_mutation_invalidates_comparison(replay_fixture, when):
 def test_cleanup_warning_preserves_original(replay_fixture, monkeypatch):
     source, case, lesson, _, _ = replay_fixture
     before = repository_state(source)
-    monkeypatch.setattr("reflex.replay.isolation.OwnedDirectory.cleanup", lambda self:"forced cleanup failure")
+    monkeypatch.setattr("retryloom.replay.isolation.OwnedDirectory.cleanup", lambda self:"forced cleanup failure")
     report = engine(replay_fixture, FixtureRunner((False,False,False))).execute(case, lesson)
     assert "CLEANUP_WARNING" in json.dumps(report.model_dump(), default=str)
     assert "forced cleanup failure" in json.dumps(report.model_dump(), default=str)
@@ -338,7 +338,7 @@ def test_mechanically_rejected_lesson_never_runs(replay_fixture, text):
 
 
 def test_cleanup_refuses_unknown_replacements_and_preserves_siblings(tmp_path):
-    from reflex.replay.isolation import OwnedDirectory
+    from retryloom.replay.isolation import OwnedDirectory
     parent = tmp_path / "parent"
     parent.mkdir()
     unrelated = parent / "keep"
@@ -406,10 +406,10 @@ def test_nonadministrative_in_source_database_is_rejected(replay_fixture):
     database.close()
 
 
-def test_only_ignored_reflex_database_is_exempt_from_source_manifest(replay_fixture):
+def test_only_ignored_retryloom_database_is_exempt_from_source_manifest(replay_fixture):
     source, case, lesson, original_db, tmp_path = replay_fixture
-    (source / ".gitignore").write_text(".reflex/\n")
-    db_path = source / ".reflex" / "reflex.db"
+    (source / ".gitignore").write_text(".retryloom/\n")
+    db_path = source / ".retryloom" / "retryloom.db"
     database = connect(db_path)
     row = original_db.execute("SELECT * FROM lessons WHERE id='lesson-1'").fetchone()
     database.execute("INSERT INTO lessons VALUES (?,?,?,?,?,?,?,?,?)", tuple(row))
@@ -429,7 +429,7 @@ def test_preparation_failure_cleans_owned_temporary_state(replay_fixture, monkey
     before = repository_state(source)
     def fail(*args, **kwargs):
         raise OSError("preparation failed")
-    monkeypatch.setattr("reflex.replay.engine.create_clone", fail)
+    monkeypatch.setattr("retryloom.replay.engine.create_clone", fail)
     runner = FixtureRunner((False,False,False))
     report = engine(replay_fixture, runner).execute(case, lesson)
     assert report.status == "INVALID_COMPARISON"
@@ -461,9 +461,9 @@ def test_end_to_end_codex_cli_fixture(replay_fixture):
 
 def test_hardlinked_administrative_database_is_rejected(replay_fixture):
     source, case, lesson, _, tmp_path = replay_fixture
-    (source / ".gitignore").write_text(".reflex/\n")
-    database = connect(source / ".reflex" / "reflex.db")
-    os.link(source / ".reflex" / "reflex.db", tmp_path / "db-alias")
+    (source / ".gitignore").write_text(".retryloom/\n")
+    database = connect(source / ".retryloom" / "retryloom.db")
+    os.link(source / ".retryloom" / "retryloom.db", tmp_path / "db-alias")
     before = (tmp_path / "db-alias").read_bytes()
     runner = FixtureRunner((False,False,False))
     report = ReplayEngine(runner, database, env={},temp_parent=tmp_path / "temp").execute(case, lesson)

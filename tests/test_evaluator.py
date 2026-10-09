@@ -7,11 +7,11 @@ import sys
 
 import pytest
 
-from reflex.replay.evaluator import evaluate
-from reflex.replay.models import CheckResult, ReplayReport, ReplayRun, RunResult
+from retryloom.replay.evaluator import evaluate
+from retryloom.replay.models import CheckResult, ReplayReport, ReplayRun, RunResult
 
 
-def report_fixture(control=0, reflex=1, control_tokens=100, reflex_tokens=100, runs=3):
+def report_fixture(control=0, retryloom=1, control_tokens=100, reflex_tokens=100, runs=3):
     check = dict(name="tests", command=["fixture-check"], required=True, timeout_seconds=60)
     manifest = dict(task="Perform the recorded task.", checks=[check], timeout_seconds=30,
                     agent="codex", agent_version="fixture-1", model="fixture-model",
@@ -19,7 +19,7 @@ def report_fixture(control=0, reflex=1, control_tokens=100, reflex_tokens=100, r
                     requested_base_commit="b" * 40, base_commit="b" * 40, runs=runs)
     manifest_hash = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
     recorded_runs = []
-    for arm, successes, tokens in (("CONTROL", control, control_tokens), ("REFLEX", reflex, reflex_tokens)):
+    for arm, successes, tokens in (("CONTROL", control, control_tokens), ("REFLEX", retryloom, reflex_tokens)):
         for index in range(runs):
             success = index < successes
             total = tokens[index] if isinstance(tokens, list) else tokens
@@ -35,7 +35,7 @@ def report_fixture(control=0, reflex=1, control_tokens=100, reflex_tokens=100, r
                                     success=success, exit_code=0 if success else 1)],
                 metadata=dict(manifest_hash=manifest_hash, base_commit="b" * 40,
                               tool_environment_keys=["HOME", "PATH"],
-                              seed_policy="paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED"),
+                              seed_policy="paired run index; PYTHONHASHSEED and RETRYLOOM_RUN_SEED"),
             ))
     return ReplayReport(id="report-1", case_id="case-1", status="COMPLETED", runs=recorded_runs,
                         metadata=dict(manifest=manifest, manifest_hash=manifest_hash,
@@ -46,12 +46,12 @@ def report_fixture(control=0, reflex=1, control_tokens=100, reflex_tokens=100, r
                                                                    model="fixture-model")))
 
 
-@pytest.mark.parametrize("control,reflex", [(0, 1), (1, 2), (1, 3)])
-def test_condition_a(control, reflex):
-    result = evaluate(report_fixture(control, reflex))
+@pytest.mark.parametrize("control,retryloom", [(0, 1), (1, 2), (1, 3)])
+def test_condition_a(control, retryloom):
+    result = evaluate(report_fixture(control, retryloom))
     assert result.status == "replay_confirmed" and result.condition == "A"
     assert result.control_success_count == control
-    assert result.reflex_success_count == reflex
+    assert result.reflex_success_count == retryloom
 
 
 @pytest.mark.parametrize("tokens,confirmed", [(80, True), (85, True), (86, False)])
@@ -64,9 +64,9 @@ def test_condition_b_boundary(tokens, confirmed):
     assert result.token_reduction_ratio == pytest.approx((100 - tokens) / 100)
 
 
-@pytest.mark.parametrize("control,reflex", [(0, 0), (1, 0)])
-def test_no_success_or_success_regression_cannot_confirm(control, reflex):
-    result = evaluate(report_fixture(control, reflex, 100, 50))
+@pytest.mark.parametrize("control,retryloom", [(0, 0), (1, 0)])
+def test_no_success_or_success_regression_cannot_confirm(control, retryloom):
+    result = evaluate(report_fixture(control, retryloom, 100, 50))
     assert result.status == "rejected" and result.condition is None
 
 
@@ -105,9 +105,9 @@ def test_optional_regression_is_recorded_without_blocking_improvement():
     assert "optional" in json.dumps(result.evidence).lower()
 
 
-@pytest.mark.parametrize("control,reflex,expected", [(1, 1, "INSUFFICIENT_EVIDENCE"), (0, 1, "replay_confirmed")])
-def test_missing_tokens_only_prevents_condition_b(control, reflex, expected):
-    report = report_fixture(control, reflex, None, None)
+@pytest.mark.parametrize("control,retryloom,expected", [(1, 1, "INSUFFICIENT_EVIDENCE"), (0, 1, "replay_confirmed")])
+def test_missing_tokens_only_prevents_condition_b(control, retryloom, expected):
+    report = report_fixture(control, retryloom, None, None)
     result = evaluate(report)
     assert result.status == expected
     assert result.control_median_tokens is None and result.reflex_median_tokens is None
@@ -281,11 +281,11 @@ def test_deterministic_evaluation_release_fixture(repetitions):
 
 
 def test_real_engine_recorded_report_evaluates_and_persists_without_reruns(tmp_path):
-    from reflex.replay.engine import ReplayEngine
-    from reflex.replay.injection import FrozenLesson
-    from reflex.replay.models import ReplayCase, ReplayCheck
-    from reflex.storage.database import connect
-    from reflex.storage.repository import load_replay_report, save_evaluation
+    from retryloom.replay.engine import ReplayEngine
+    from retryloom.replay.injection import FrozenLesson
+    from retryloom.replay.models import ReplayCase, ReplayCheck
+    from retryloom.storage.database import connect
+    from retryloom.storage.repository import load_replay_report, save_evaluation
 
     source = tmp_path / "source"
     source.mkdir()
@@ -298,7 +298,7 @@ def test_real_engine_recorded_report_evaluates_and_persists_without_reruns(tmp_p
     git("add", "base")
     git("commit", "-qm", "base")
     lesson = FrozenLesson.freeze("Run relevant checks after changes.")
-    database = connect(tmp_path / "reflex.db")
+    database = connect(tmp_path / "retryloom.db")
     database.execute("INSERT INTO lessons(id,scope,trigger_json,rule,evidence_sessions_json,confidence,status,lesson_hash) VALUES (?,?,?,?,?,?,?,?)",
                      ("lesson-1", "repository", "{}", lesson.text, "[]", 0.5, "candidate", lesson.lesson_hash))
     database.commit()

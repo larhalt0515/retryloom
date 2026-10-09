@@ -8,7 +8,7 @@ from pathlib import Path
 import secrets
 import stat
 
-from reflex.storage.lifecycle import load_lesson_state
+from retryloom.storage.lifecycle import load_lesson_state
 
 
 def _hash(content):
@@ -43,8 +43,8 @@ class ApplyResult:
 
 
 def _relative(target, lesson):
-    if target in ('.reflex/skills', '.reflex/skills/'):
-        return '.reflex/skills/' + _hash((lesson.lesson_hash + lesson.canonical_fingerprint).encode()) + '.md'
+    if target in ('.retryloom/skills', '.retryloom/skills/'):
+        return '.retryloom/skills/' + _hash((lesson.lesson_hash + lesson.canonical_fingerprint).encode()) + '.md'
     if target not in ('AGENTS.md', 'CLAUDE.md'):
         raise ValueError('unsupported or unsafe apply target')
     return target
@@ -100,8 +100,8 @@ def preview_apply(connection, repository: Path, lesson_id, target='AGENTS.md'):
         raise ValueError('lesson repository scope mismatch')
     relative = _relative(target, lesson)
     before, identity, parents = _snapshot(root, relative)
-    marker = '<!-- reflex:' + _hash((lesson.lesson_hash + lesson.canonical_fingerprint).encode()) + ' -->'
-    block = (marker + '\n' + lesson.rule + '\n<!-- /reflex -->\n').encode()
+    marker = '<!-- retryloom:' + _hash((lesson.lesson_hash + lesson.canonical_fingerprint).encode()) + ' -->'
+    block = (marker + '\n' + lesson.rule + '\n<!-- /retryloom -->\n').encode()
     if state.effective_status == 'applied':
         if state.application['target'] != relative or before is None or block not in before or before.count(marker.encode()) != 1:
             raise ValueError('applied target differs from audited content; new review required')
@@ -179,7 +179,7 @@ def _expect_at(fd, name, expected):
 
 
 def _replace_at(fd, name, content, mode, expected, written_state=None):
-    temp = '.reflex-apply-' + secrets.token_hex(16)
+    temp = '.retryloom-apply-' + secrets.token_hex(16)
     try:
         filefd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode, dir_fd=fd)
         with os.fdopen(filefd, 'wb') as stream:
@@ -214,7 +214,7 @@ def commit_apply(connection, preview, confirmed: bool):
     connection.execute('BEGIN IMMEDIATE')
     try:
         current = preview_apply(connection, preview.repository, preview.lesson_id,
-                                '.reflex/skills/' if preview.target.startswith('.reflex/skills/') else preview.target)
+                                '.retryloom/skills/' if preview.target.startswith('.retryloom/skills/') else preview.target)
         if current != preview:
             raise ValueError('target or lesson changed; new preview required')
         if preview.already_applied:

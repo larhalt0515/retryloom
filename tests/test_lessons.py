@@ -7,11 +7,11 @@ import sys
 import pytest
 from pydantic import ValidationError
 
-from reflex.analysis.corrections import extract_corrections
-from reflex.analysis.failures import detect_failure
-from reflex.analysis.lessons import audit_lesson, freeze_candidate, generate_candidate
-from reflex.models import CorrectionEvidence, Session, SessionEvent
-from reflex.replay.injection import FrozenLesson, instructions_for
+from retryloom.analysis.corrections import extract_corrections
+from retryloom.analysis.failures import detect_failure
+from retryloom.analysis.lessons import audit_lesson, freeze_candidate, generate_candidate
+from retryloom.models import CorrectionEvidence, Session, SessionEvent
+from retryloom.replay.injection import FrozenLesson, instructions_for
 
 
 def evidence(session_id="session-1", repository="/repo", **changes):
@@ -282,8 +282,8 @@ def test_codex_raw_call_trace_correction_extraction():
 
 
 def stored_candidate(tmp_path, rule=None):
-    from reflex.storage.database import connect
-    from reflex.storage.repository import save_failure, save_lesson, save_session
+    from retryloom.storage.database import connect
+    from retryloom.storage.repository import save_failure, save_lesson, save_session
     source, failure = history()
     records = extract_corrections(source, failure)
     lesson = generate_candidate(records)
@@ -297,7 +297,7 @@ def stored_candidate(tmp_path, rule=None):
 
 
 def test_candidate_audit_scope_confidence_and_references_round_trip(tmp_path):
-    from reflex.storage.repository import load_lesson
+    from retryloom.storage.repository import load_lesson
     database, records, saved = stored_candidate(tmp_path)
     loaded = load_lesson(database, saved.id)
     assert loaded == saved and loaded.status == "candidate"
@@ -310,7 +310,7 @@ def test_candidate_audit_scope_confidence_and_references_round_trip(tmp_path):
 
 
 def test_unsafe_lesson_is_persisted_as_rejected_and_cannot_be_overridden(tmp_path):
-    from reflex.storage.repository import load_lesson, prepare_lesson_for_replay, resolve_lesson_audit
+    from retryloom.storage.repository import load_lesson, prepare_lesson_for_replay, resolve_lesson_audit
     database, records, saved = stored_candidate(tmp_path, "Always use C.")
     assert saved.status == "rejected" and saved.audit.status == "REJECT"
     assert load_lesson(database, saved.id).status == "rejected"
@@ -322,7 +322,7 @@ def test_unsafe_lesson_is_persisted_as_rejected_and_cannot_be_overridden(tmp_pat
 
 
 def test_suspect_requires_explicit_bound_audit_resolution_before_replay(tmp_path):
-    from reflex.storage.repository import prepare_lesson_for_replay, resolve_lesson_audit
+    from retryloom.storage.repository import prepare_lesson_for_replay, resolve_lesson_audit
     database, records, saved = stored_candidate(tmp_path, "When tests fail, inspect corrected_record before repeating the check.")
     assert saved.status == "candidate" and saved.audit.status == "SUSPECT"
     assert database.execute("SELECT leak_suspect FROM lessons WHERE id=?", (saved.id,)).fetchone()[0] == 1
@@ -340,7 +340,7 @@ def test_suspect_requires_explicit_bound_audit_resolution_before_replay(tmp_path
 
 
 def test_phase8_cannot_persist_forged_replay_confirmed_status(tmp_path):
-    from reflex.storage.repository import save_lesson
+    from retryloom.storage.repository import save_lesson
     database, records, saved = stored_candidate(tmp_path)
     forged = saved.model_copy(update={"status": "replay_confirmed"})
     with pytest.raises(ValueError):
@@ -350,7 +350,7 @@ def test_phase8_cannot_persist_forged_replay_confirmed_status(tmp_path):
 
 
 def test_missing_historical_failure_reference_cannot_be_persisted(tmp_path):
-    from reflex.storage.repository import save_lesson
+    from retryloom.storage.repository import save_lesson
     database, records, _ = stored_candidate(tmp_path)
     invalid = [records[0].model_copy(update={"failure_id": "missing-failure"})]
     lesson = generate_candidate(invalid)
@@ -361,7 +361,7 @@ def test_missing_historical_failure_reference_cannot_be_persisted(tmp_path):
 
 
 def test_correction_source_cannot_be_omitted_to_bypass_leakage_audit(tmp_path):
-    from reflex.storage.repository import save_lesson
+    from retryloom.storage.repository import save_lesson
     database, records, _ = stored_candidate(tmp_path)
     omitted = [records[0].model_copy(update={"correction_diff": "", "source_before": ""})]
     lesson = generate_candidate(omitted).model_copy(update={
@@ -373,7 +373,7 @@ def test_correction_source_cannot_be_omitted_to_bypass_leakage_audit(tmp_path):
 
 
 def test_post_freeze_context_mutation_is_detected_on_load(tmp_path):
-    from reflex.storage.repository import load_lesson
+    from retryloom.storage.repository import load_lesson
     database, _, saved = stored_candidate(tmp_path)
     database.execute("UPDATE lessons SET scope='generic' WHERE id=?", (saved.id,))
     database.commit()
@@ -384,11 +384,11 @@ def test_post_freeze_context_mutation_is_detected_on_load(tmp_path):
 
 @pytest.mark.parametrize("scenario", ["normal", "context_mutation", "wrong_repository"])
 def test_canonical_history_to_frozen_lesson_and_recorded_replay(tmp_path, scenario):
-    from reflex.replay.engine import ReplayEngine
-    from reflex.replay.evaluator import evaluate
-    from reflex.replay.models import ReplayCase, ReplayCheck, RunResult
-    from reflex.storage.database import connect
-    from reflex.storage.repository import load_lesson, prepare_lesson_for_replay, save_failure, save_lesson, save_session
+    from retryloom.replay.engine import ReplayEngine
+    from retryloom.replay.evaluator import evaluate
+    from retryloom.replay.models import ReplayCase, ReplayCheck, RunResult
+    from retryloom.storage.database import connect
+    from retryloom.storage.repository import load_lesson, prepare_lesson_for_replay, save_failure, save_lesson, save_session
 
     source_root = tmp_path / "source"
     source_root.mkdir()
@@ -403,7 +403,7 @@ def test_canonical_history_to_frozen_lesson_and_recorded_replay(tmp_path, scenar
     session, failure = history(str(source_root))
     records = extract_corrections(session, failure)
     lesson = generate_candidate(records)
-    database = connect(tmp_path / "reflex.db")
+    database = connect(tmp_path / "retryloom.db")
     save_session(database, session)
     save_failure(database, failure)
     before = {table: [tuple(row) for row in database.execute(f"SELECT * FROM {table}")] for table in ("sessions", "session_events", "failures")}

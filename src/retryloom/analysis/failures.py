@@ -2,7 +2,7 @@
 import hashlib
 import re
 
-from reflex.models import FailureEvent, Session
+from retryloom.models import FailureEvent, Session
 from .signals import confidence, score_signals
 
 TEST_COMMAND = re.compile(r"\b(?:pytest|unittest|jest|vitest|go test|cargo test|npm test)\b")

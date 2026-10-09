@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import Protocol
 
-from reflex.models import Session
+from retryloom.models import Session
 
 
 class SessionAdapter(Protocol):

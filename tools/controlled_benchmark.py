@@ -17,20 +17,20 @@ from pathlib import Path
 import sqlite3
 import sys
 
-from reflex import __version__
-from reflex.adapters.codex import CodexAdapter
-from reflex.analysis.corrections import extract_corrections
-from reflex.analysis.failures import detect_failure
-from reflex.analysis.lessons import generate_candidate
-from reflex.git.repository import repository_state
-from reflex.output.stats import collect_stats
-from reflex.replay.engine import ReplayEngine
-from reflex.replay.evaluator import evaluate
-from reflex.replay.isolation import create_clone, git_command, run_environment
-from reflex.replay.models import ReplayCase, ReplayCheck, RunResult
-from reflex.replay.subprocess import execute_process
-from reflex.storage.database import connect
-from reflex.storage.repository import (
+from retryloom import __version__
+from retryloom.adapters.codex import CodexAdapter
+from retryloom.analysis.corrections import extract_corrections
+from retryloom.analysis.failures import detect_failure
+from retryloom.analysis.lessons import generate_candidate
+from retryloom.git.repository import repository_state
+from retryloom.output.stats import collect_stats
+from retryloom.replay.engine import ReplayEngine
+from retryloom.replay.evaluator import evaluate
+from retryloom.replay.isolation import create_clone, git_command, run_environment
+from retryloom.replay.models import ReplayCase, ReplayCheck, RunResult
+from retryloom.replay.subprocess import execute_process
+from retryloom.storage.database import connect
+from retryloom.storage.repository import (
     load_lesson, load_replay_report, prepare_lesson_for_replay, save_evaluation,
     save_failure, save_lesson, save_session,
 )
@@ -123,7 +123,7 @@ def run_benchmark(root: Path) -> dict:
     root = Path(root).absolute()
     source_root = Path(__file__).resolve().parents[1]
     if root.resolve().is_relative_to(source_root):
-        raise ValueError('benchmark output must be outside the Reflex source repository')
+        raise ValueError('benchmark output must be outside the Retryloom source repository')
     if root.is_symlink():
         raise ValueError('output root must not be a symlink')
     if root.exists():
@@ -131,7 +131,7 @@ def run_benchmark(root: Path) -> dict:
             raise ValueError('output root must be new or empty; existing trials are never discarded')
     else:
         root.mkdir(parents=True, exist_ok=False)
-    # Refuse an output directory inside Reflex; benchmark repository is separate.
+    # Refuse an output directory inside Retryloom; benchmark repository is separate.
     root = root.resolve()
     _write(root / 'trial.json', {'evidence_category': LABEL, 'created_at': datetime.now(timezone.utc).isoformat(),
                               'live_execution': False, 'historical_agent_session': False})
@@ -146,9 +146,9 @@ def run_benchmark(root: Path) -> dict:
     git_command(repository, setup_env, 'init', '--template=', '.')
     (repository / 'parser.py').write_text(OLD_PARSER, encoding='utf-8')
     (repository / 'test_parser.py').write_text(TESTS, encoding='utf-8')
-    (repository / '.gitignore').write_text('.reflex/\n__pycache__/\n', encoding='utf-8')
+    (repository / '.gitignore').write_text('.retryloom/\n__pycache__/\n', encoding='utf-8')
     git_command(repository, setup_env, 'add', 'parser.py', 'test_parser.py', '.gitignore')
-    git_command(repository, setup_env, '-c', 'user.name=Reflex Synthetic Fixture',
+    git_command(repository, setup_env, '-c', 'user.name=Retryloom Synthetic Fixture',
                 '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'Predeclared synthetic CSV base')
     commit = git_command(repository, setup_env, 'rev-parse', 'HEAD')
     check_command = [PYTHON, '-B', '-m', 'unittest', '-v']
@@ -201,7 +201,7 @@ def run_benchmark(root: Path) -> dict:
     corrections = extract_corrections(session, failure)
     candidate = generate_candidate(corrections)
     _require(candidate is not None, 'canonical correction extraction/generation failed')
-    database = repository / '.reflex' / 'reflex.db'
+    database = repository / '.retryloom' / 'retryloom.db'
     connection = connect(database)
     try:
         save_session(connection, session)
@@ -209,7 +209,7 @@ def run_benchmark(root: Path) -> dict:
         lesson = save_lesson(connection, candidate, corrections)
         frozen = prepare_lesson_for_replay(connection, lesson.id, corrections)
         source_hashes = {str(path.relative_to(source_root)): _sha(path.read_bytes())
-                         for path in sorted((source_root / 'src' / 'reflex').rglob('*.py'))
+                         for path in sorted((source_root / 'src' / 'retryloom').rglob('*.py'))
                          if not path.is_symlink()}
         try:
             parent_commit = git_command(source_root, setup_env, 'rev-parse', 'HEAD')
@@ -217,9 +217,9 @@ def run_benchmark(root: Path) -> dict:
             parent_commit = None
         try:
             git_command(source_root, setup_env, 'ls-files', '--error-unmatch', 'pyproject.toml')
-            reflex_tracked = True
+            retryloom_tracked = True
         except RuntimeError:
-            reflex_tracked = False
+            retryloom_tracked = False
         case = ReplayCase(id='synthetic-csv-neutral-v1', repository=repository, base_commit=commit,
                           task=TASK, checks=[ReplayCheck(name='CSV unittest', command=check_command,
                                                         required=True, timeout_seconds=10)],
@@ -229,11 +229,11 @@ def run_benchmark(root: Path) -> dict:
             'evidence_category': LABEL, 'live_execution': False, 'case': case.model_dump(mode='json'),
             'frozen_lesson': lesson.model_dump(mode='json'), 'lesson_hash': frozen.lesson_hash,
             'runner_code_hash': _sha(FIXTURE_PROGRAM.encode()), 'script_hash': _sha(Path(__file__).read_bytes()),
-            'reflex_version': __version__, 'python_version': sys.version,
-            'python_executable': PYTHON, 'reflex_source_files_sha256': source_hashes,
-            'reflex_source_tree_hash': _sha(json.dumps(source_hashes, sort_keys=True).encode()),
-            'parent_git_commit': parent_commit, 'reflex_project_tracked': reflex_tracked,
-            'commit_provenance_note': 'Parent Git commit is not a Reflex release commit; source hashes identify untracked Reflex code.' if not reflex_tracked else 'Source hashes identify the working implementation.',
+            'retryloom_version': __version__, 'python_version': sys.version,
+            'python_executable': PYTHON, 'retryloom_source_files_sha256': source_hashes,
+            'retryloom_source_tree_hash': _sha(json.dumps(source_hashes, sort_keys=True).encode()),
+            'parent_git_commit': parent_commit, 'retryloom_project_tracked': retryloom_tracked,
+            'commit_provenance_note': 'Parent Git commit is not a Retryloom release commit; source hashes identify untracked Retryloom code.' if not retryloom_tracked else 'Source hashes identify the working implementation.',
             'expected_result': 'VALID NEUTRAL RESULT', 'expected_control_success_count': 0,
             'expected_reflex_success_count': 0, 'runner_interprets_lesson': False,
             'intentional_condition_difference': 'exact frozen Lesson injection only',
@@ -242,7 +242,7 @@ def run_benchmark(root: Path) -> dict:
             'no_setup_runs_counted': True,
             'live_codex_validation': {'status': 'INFRASTRUCTURE BLOCKED',
                 'reason': 'Parent sandbox prohibits nested sandbox-exec; installed CLI help does not document authenticated network execution with sufficient filesystem confinement.',
-                'classification': 'validation gap, not Reflex implementation failure',
+                'classification': 'validation gap, not Retryloom implementation failure',
                 'production_changes_caused_by_failed_smokes': 'None'},
             'live_claude_validation': {'status': 'INFRASTRUCTURE BLOCKED',
                 'reason': 'Equivalent filesystem confinement has not been established; no live Claude execution attempted.'},

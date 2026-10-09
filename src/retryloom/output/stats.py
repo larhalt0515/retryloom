@@ -7,8 +7,8 @@ import math
 import sqlite3
 from statistics import median
 
-from reflex.replay.evaluator import evaluate
-from reflex.storage.repository import load_replay_report
+from retryloom.replay.evaluator import evaluate
+from retryloom.storage.repository import load_replay_report
 
 
 def _rows(connection, query):

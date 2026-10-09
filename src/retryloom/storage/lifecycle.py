@@ -5,8 +5,8 @@ import hashlib
 import json
 from pathlib import Path
 
-from reflex.replay.evaluator import evaluate
-from reflex.storage.repository import _load_frozen_lesson, load_replay_report
+from retryloom.replay.evaluator import evaluate
+from retryloom.storage.repository import _load_frozen_lesson, load_replay_report
 
 
 @dataclass(frozen=True)
@@ -80,7 +80,7 @@ def load_lesson_state(connection, lesson_id):
         app['frozen_fingerprint'] != lesson.canonical_fingerprint or
         Path(app['repository']).resolve() != Path(lesson.trigger.repository).resolve() or
         target.is_absolute() or '..' in target.parts or
-        not (str(target) in ('AGENTS.md','CLAUDE.md') or target.parts[:2] == ('.reflex','skills')) or
+        not (str(target) in ('AGENTS.md','CLAUDE.md') or target.parts[:2] == ('.retryloom','skills')) or
         app['from_status'] != 'replay_confirmed' or app['to_status'] != 'applied' or
         app['outcome'] not in ('applied','already_present') or not timestamp_valid or
         not all(digest_valid(app[key]) for key in ('after_hash','report_hash','lesson_hash','frozen_fingerprint')) or

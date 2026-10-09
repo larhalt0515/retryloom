@@ -143,8 +143,8 @@ def evaluate(report: ReplayReport) -> Evaluation:
     if planned - counts["CONTROL"] <= planned // 2:
         return finish("BASELINE_NOT_REPRODUCIBLE", "control failures did not form a strict majority")
 
-    for control, reflex in zip(arms["CONTROL"], arms["REFLEX"]):
-        for number, (before, after) in enumerate(zip(control.checks, reflex.checks), 1):
+    for control, enhanced in zip(arms["CONTROL"], arms["REFLEX"]):
+        for number, (before, after) in enumerate(zip(control.checks, enhanced.checks), 1):
             if before.success and not after.success:
                 key = "required_check_regressions" if before.required else "optional_check_regressions"
                 evidence[key].append({"run_number": control.run_number,
@@ -153,13 +153,13 @@ def evaluate(report: ReplayReport) -> Evaluation:
 
     efficiency_reason = _efficiency_unavailable(report)
     evidence["efficiency_unavailable_reason"] = efficiency_reason
-    control_twice_median = reflex_twice_median = None
+    control_twice_median = enhanced_twice_median = None
     if efficiency_reason is None:
         control_twice_median = _twice_median([run.result.token_total for run in arms["CONTROL"]])
-        reflex_twice_median = _twice_median([run.result.token_total for run in arms["REFLEX"]])
+        enhanced_twice_median = _twice_median([run.result.token_total for run in arms["REFLEX"]])
         values.update(control_median_tokens=control_twice_median / 2,
-                      reflex_median_tokens=reflex_twice_median / 2,
-                      token_reduction_ratio=((control_twice_median - reflex_twice_median) / control_twice_median
+                      reflex_median_tokens=enhanced_twice_median / 2,
+                      token_reduction_ratio=((control_twice_median - enhanced_twice_median) / control_twice_median
                                              if control_twice_median > 0 else None))
         evidence["efficiency_available"] = True
     if values["required_check_regression"]:
@@ -169,7 +169,7 @@ def evaluate(report: ReplayReport) -> Evaluation:
     if counts["REFLEX"] == counts["CONTROL"] and counts["CONTROL"] >= 1:
         if efficiency_reason is not None:
             return finish("INSUFFICIENT_EVIDENCE", "condition B unavailable: " + efficiency_reason)
-        if control_twice_median > 0 and reflex_twice_median * 100 <= control_twice_median * 85:
+        if control_twice_median > 0 and enhanced_twice_median * 100 <= control_twice_median * 85:
             return finish("replay_confirmed", "equal successes with at least 15 percent median token reduction", "B")
     return finish("rejected", "neither success improvement nor eligible token improvement was demonstrated")
 

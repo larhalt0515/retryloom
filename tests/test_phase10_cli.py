@@ -4,8 +4,8 @@ import subprocess
 
 from typer.testing import CliRunner
 
-from reflex.main import app
-from reflex.storage.database import connect
+from retryloom.main import app
+from retryloom.storage.database import connect
 from test_apply import eligible
 
 
@@ -29,12 +29,12 @@ def test_stats_without_storage_creates_nothing(tmp_path):
     assert "Sessions analyzed: 0" in result.output
     assert "N/A" in result.output
     assert files(root) == before
-    assert not (root / ".reflex").exists()
+    assert not (root / ".retryloom").exists()
 
 
 def test_stats_preserves_existing_database_and_files(tmp_path):
     root = repository(tmp_path)
-    with connect(root / ".reflex/reflex.db") as db:
+    with connect(root / ".retryloom/retryloom.db") as db:
         db.execute("INSERT INTO sessions(id,agent,repository,started_at) VALUES ('s','Claude',?,'2026-01-01')", (str(root),))
     before = files(root)
     first = CliRunner().invoke(app, ["stats", "--repository", str(root)])
@@ -47,7 +47,7 @@ def test_stats_preserves_existing_database_and_files(tmp_path):
 
 def test_apply_listing_is_read_only(tmp_path):
     root = repository(tmp_path)
-    with connect(root / ".reflex/reflex.db"):
+    with connect(root / ".retryloom/retryloom.db"):
         pass
     before = files(root)
     result = CliRunner().invoke(app, ["apply", "--repository", str(root)])
@@ -60,13 +60,13 @@ def test_stats_rejects_symlink_storage(tmp_path):
     root = repository(tmp_path)
     outside = tmp_path / "external"
     outside.mkdir()
-    with connect(outside / "reflex.db"):
+    with connect(outside / "retryloom.db"):
         pass
-    (root / ".reflex").symlink_to(outside, target_is_directory=True)
-    before = (outside / "reflex.db").read_bytes()
+    (root / ".retryloom").symlink_to(outside, target_is_directory=True)
+    before = (outside / "retryloom.db").read_bytes()
     result = CliRunner().invoke(app, ["stats", "--repository", str(root)])
     assert result.exit_code != 0
-    assert (outside / "reflex.db").read_bytes() == before
+    assert (outside / "retryloom.db").read_bytes() == before
 
 
 def test_v4_migration_adds_application_audit_without_changing_evidence(tmp_path):
@@ -88,7 +88,7 @@ def test_v4_migration_adds_application_audit_without_changing_evidence(tmp_path)
 def cli_project(eligible):
     source, root, lesson = eligible
     subprocess.run(["git", "init", str(root)], check=True, capture_output=True)
-    path = root / ".reflex/reflex.db"
+    path = root / ".retryloom/retryloom.db"
     path.parent.mkdir()
     with sqlite3.connect(path) as target:
         source.backup(target)
@@ -124,10 +124,10 @@ def test_apply_cli_skills_alias(eligible):
     args = ["apply", "--repository", str(root), "--lesson-id", lesson.id, "--target", "skills"]
     preview = CliRunner().invoke(app, [*args, "--preview"])
     assert preview.exit_code == 0, preview.output
-    assert not (root / ".reflex/skills").exists()
+    assert not (root / ".retryloom/skills").exists()
     success = CliRunner().invoke(app, args, input="y\n")
     assert success.exit_code == 0, success.output
-    files_written = list((root / ".reflex/skills").glob("*.md"))
+    files_written = list((root / ".retryloom/skills").glob("*.md"))
     assert len(files_written) == 1
     assert lesson.rule in files_written[0].read_text()
 
@@ -149,7 +149,7 @@ def test_apply_cli_v4_preview_does_not_migrate_database(eligible):
 
 def test_apply_default_target_follows_configured_claude_agent(eligible):
     root, lesson, _ = cli_project(eligible)
-    (root / ".reflex/config.toml").write_text('[project]\ndefault_agent = "claude"\n')
+    (root / ".retryloom/config.toml").write_text('[project]\ndefault_agent = "claude"\n')
     result = CliRunner().invoke(app, ["apply", "--repository", str(root), "--lesson-id", lesson.id], input="y\n")
     assert result.exit_code == 0, result.output
     assert (root / "CLAUDE.md").exists()

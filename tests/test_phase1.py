@@ -1,15 +1,15 @@
 from datetime import datetime, timezone
 from typing import get_type_hints
 
-from reflex.config.loader import load_config, write_default_config
-from reflex.models import Session, SessionEvent
-from reflex.storage.database import connect
-from reflex.storage.repository import save_session
-from reflex.adapters.base import SessionAdapter
+from retryloom.config.loader import load_config, write_default_config
+from retryloom.models import Session, SessionEvent
+from retryloom.storage.database import connect
+from retryloom.storage.repository import save_session
+from retryloom.adapters.base import SessionAdapter
 
 
 def test_default_config_round_trips(tmp_path):
-    path = tmp_path / ".reflex" / "config.toml"
+    path = tmp_path / ".retryloom" / "config.toml"
     config = write_default_config(path)
 
     assert load_config(path) == config
@@ -18,7 +18,7 @@ def test_default_config_round_trips(tmp_path):
 
 
 def test_session_and_events_are_persisted(tmp_path):
-    database = connect(tmp_path / "reflex.db")
+    database = connect(tmp_path / "retryloom.db")
     session = Session(
         id="session-1",
         agent="codex",
@@ -37,7 +37,7 @@ def test_session_and_events_are_persisted(tmp_path):
 
 
 def test_schema_is_idempotent(tmp_path):
-    path = tmp_path / "reflex.db"
+    path = tmp_path / "retryloom.db"
     first = connect(path)
     second = connect(path)
 

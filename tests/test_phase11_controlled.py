@@ -8,10 +8,10 @@ import sys
 import pytest
 from typer.testing import CliRunner
 
-from reflex.main import app
-from reflex.output.stats import collect_stats
-from reflex.replay.evaluator import evaluate
-from reflex.replay.models import ReplayReport
+from retryloom.main import app
+from retryloom.output.stats import collect_stats
+from retryloom.replay.evaluator import evaluate
+from retryloom.replay.models import ReplayReport
 
 
 @pytest.fixture(scope='module')
@@ -86,7 +86,7 @@ def test_same_evidence_evaluates_identically_ten_times(benchmark):
 
 
 def test_session_failure_lesson_and_evaluation_persist(benchmark):
-    db = sqlite3.connect((benchmark[0] / 'repository/.reflex/reflex.db').as_uri() + '?mode=ro', uri=True)
+    db = sqlite3.connect((benchmark[0] / 'repository/.retryloom/retryloom.db').as_uri() + '?mode=ro', uri=True)
     try:
         for table in ('sessions', 'failures', 'lessons', 'evaluations'):
             assert db.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0] == 1
@@ -101,7 +101,7 @@ def test_session_failure_lesson_and_evaluation_persist(benchmark):
 
 def test_stats_agree_with_persisted_evidence_and_remain_read_only(benchmark):
     root = benchmark[0] / 'repository'
-    path = root / '.reflex/reflex.db'
+    path = root / '.retryloom/retryloom.db'
     before = path.read_bytes()
     with sqlite3.connect(path.as_uri() + '?mode=ro', uri=True) as db:
         db.execute('PRAGMA query_only=ON')

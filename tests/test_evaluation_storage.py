@@ -5,11 +5,11 @@ import sqlite3
 
 import pytest
 
-from reflex.replay.evaluator import evaluate
-from reflex.replay.models import CheckResult, ReplayCase, ReplayCheck, ReplayReport, ReplayRun, RunResult
-from reflex.storage.database import connect, initialize_schema
-from reflex.storage.repository import load_replay_report, save_evaluation, save_replay
-from reflex.storage.schema import SCHEMA_SQL
+from retryloom.replay.evaluator import evaluate
+from retryloom.replay.models import CheckResult, ReplayCase, ReplayCheck, ReplayReport, ReplayRun, RunResult
+from retryloom.storage.database import connect, initialize_schema
+from retryloom.storage.repository import load_replay_report, save_evaluation, save_replay
+from retryloom.storage.schema import SCHEMA_SQL
 
 
 def recorded_report():
@@ -176,7 +176,7 @@ def test_migration_preserves_legacy_evaluation_and_null_evidence(tmp_path, versi
 
 
 def test_v2_evaluation_migration_failure_rolls_back_all_added_columns(tmp_path, monkeypatch):
-    import reflex.storage.database as module
+    import retryloom.storage.database as module
     database = sqlite3.connect(tmp_path / "rollback.db")
     database.executescript(SCHEMA_SQL)
     database.execute("INSERT INTO metadata VALUES ('schema_version','2')")

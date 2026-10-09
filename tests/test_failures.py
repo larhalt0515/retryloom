@@ -2,11 +2,11 @@ from datetime import datetime, timezone, timedelta
 import json
 import pytest
 
-from reflex.models import Session, SessionEvent
-from reflex.analysis.failures import detect_failure
-from reflex.analysis.signals import confidence, score_signals
-from reflex.storage.database import connect
-from reflex.storage.repository import save_session, save_failure
+from retryloom.models import Session, SessionEvent
+from retryloom.analysis.failures import detect_failure
+from retryloom.analysis.signals import confidence, score_signals
+from retryloom.storage.database import connect
+from retryloom.storage.repository import save_session, save_failure
 
 
 def session(events):

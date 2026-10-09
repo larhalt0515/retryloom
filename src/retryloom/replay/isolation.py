@@ -45,7 +45,7 @@ class OwnedDirectory:
 
     @classmethod
     def create(cls, parent: Path | None = None) -> "OwnedDirectory":
-        path = Path(tempfile.mkdtemp(prefix="reflex-replay-", dir=parent)).absolute()
+        path = Path(tempfile.mkdtemp(prefix="retryloom-replay-", dir=parent)).absolute()
         parent_info, info = path.parent.stat(), path.lstat()
         return cls(path, parent_info.st_dev, parent_info.st_ino, info.st_dev, info.st_ino)
 
@@ -84,7 +84,7 @@ def run_environment(root: Path, baseline: dict[str, str], seed: int) -> dict[str
         path.mkdir()
         result[name] = str(path)
     result.update(TMP=result["TMPDIR"], TEMP=result["TMPDIR"],
-                  PYTHONHASHSEED=str(seed), REFLEX_RUN_SEED=str(seed))
+                  PYTHONHASHSEED=str(seed), RETRYLOOM_RUN_SEED=str(seed))
     return git_environment(result)
 
 
@@ -94,8 +94,8 @@ def create_clone(source: Path, root: Path, commit: str, env: dict[str, str]) -> 
     seed = root / "seed.git"
     git_command(root, env, "init", "--bare", "--template=", str(seed))
     git_command(seed, env, "fetch", "--depth=1", "--no-tags", "--no-write-fetch-head", "--",
-                str(source), f"{commit}:refs/heads/reflex-base")
-    git_command(seed, env, "symbolic-ref", "HEAD", "refs/heads/reflex-base")
+                str(source), f"{commit}:refs/heads/retryloom-base")
+    git_command(seed, env, "symbolic-ref", "HEAD", "refs/heads/retryloom-base")
     destination = root / "repository"
     git_command(root, env, "clone", "--no-local", "--no-hardlinks", "--no-checkout",
                 "--no-tags", "--template=", "--", str(seed), str(destination))

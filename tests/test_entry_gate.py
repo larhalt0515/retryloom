@@ -3,8 +3,8 @@ import sys
 
 import pytest
 
-from reflex.replay.injection import FrozenLesson, instructions_for
-from reflex.replay.runner import CodexRunner
+from retryloom.replay.injection import FrozenLesson, instructions_for
+from retryloom.replay.runner import CodexRunner
 
 
 def fixture_cli(tmp_path, body):

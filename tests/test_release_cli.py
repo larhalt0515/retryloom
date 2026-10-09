@@ -11,13 +11,13 @@ import sys
 import pytest
 from typer.testing import CliRunner
 
-from reflex.main import app
-from reflex.models import Session, SessionEvent
-from reflex.storage.database import connect
-from reflex.storage.repository import save_session
-from reflex.replay.models import RunResult
-from reflex.replay.subprocess import execute_process
-from reflex.git.repository import repository_state
+from retryloom.main import app
+from retryloom.models import Session, SessionEvent
+from retryloom.storage.database import connect
+from retryloom.storage.repository import save_session
+from retryloom.replay.models import RunResult
+from retryloom.replay.subprocess import execute_process
+from retryloom.git.repository import repository_state
 
 cli = CliRunner()
 
@@ -44,7 +44,7 @@ def seed(root, *, corrected=True, other_repository=None):
     if corrected:
         session.events += [SessionEvent(type='file_edit',content='+behavior correction'),
                            SessionEvent(type='tool_result',command='pytest',exit_code=0)]
-    with connect(root/'.reflex/reflex.db') as db: save_session(db,session)
+    with connect(root/'.retryloom/retryloom.db') as db: save_session(db,session)
     return session
 
 
@@ -52,7 +52,7 @@ def lesson(root):
     init(root); seed(root)
     result=cli.invoke(app,['learn','--repository',str(root),'--session-id','synthetic-session'])
     assert result.exit_code==0,result.output
-    with sqlite3.connect(root/'.reflex/reflex.db') as db:
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db:
         return db.execute('SELECT id,lesson_hash FROM lessons').fetchone()
 
 
@@ -81,14 +81,14 @@ def test_command_help(name):
 
 def test_init_idempotent_preserves_owned_and_user_content(tmp_path):
     root=repo(tmp_path); init(root)
-    config=root/'.reflex/config.toml'; config.write_text(config.read_text()+'\n# user comment\n')
+    config=root/'.retryloom/config.toml'; config.write_text(config.read_text()+'\n# user comment\n')
     (root/'AGENTS.md').write_text('user instruction\n')
     before=snapshot(root); init(root)
     assert snapshot(root)==before
-    for name in ['lessons','replays','reports','logs']: assert (root/'.reflex'/name).is_dir()
+    for name in ['lessons','replays','reports','logs']: assert (root/'.retryloom'/name).is_dir()
 
 
-@pytest.mark.parametrize('target',['.reflex','.reflex/config.toml','.reflex/reflex.db','.reflex/lessons','.reflex/reflex.db-journal'])
+@pytest.mark.parametrize('target',['.retryloom','.retryloom/config.toml','.retryloom/retryloom.db','.retryloom/lessons','.retryloom/retryloom.db-journal'])
 def test_init_rejects_symlinks_without_external_writes(tmp_path,target):
     root=repo(tmp_path); external=tmp_path/'external'; external.mkdir()
     path=root/target; path.parent.mkdir(parents=True,exist_ok=True)
@@ -99,26 +99,26 @@ def test_init_rejects_symlinks_without_external_writes(tmp_path,target):
 
 
 def test_init_rejects_hardlinked_database(tmp_path):
-    root=repo(tmp_path); init(root); db=root/'.reflex/reflex.db'; os.link(db,tmp_path/'alias.db')
+    root=repo(tmp_path); init(root); db=root/'.retryloom/retryloom.db'; os.link(db,tmp_path/'alias.db')
     before=db.read_bytes(); result=cli.invoke(app,['init','--repository',str(root)])
     assert result.exit_code!=0 and db.read_bytes()==before
 
 
 def test_init_invalid_repository_and_existing_invalid_config(tmp_path):
     result=cli.invoke(app,['init','--repository',str(tmp_path/'missing')]); assert result.exit_code!=0
-    root=repo(tmp_path); (root/'.reflex').mkdir(); config=root/'.reflex/config.toml'; config.write_text('bad TOML !!')
+    root=repo(tmp_path); (root/'.retryloom').mkdir(); config=root/'.retryloom/config.toml'; config.write_text('bad TOML !!')
     before=snapshot(root); result=cli.invoke(app,['init','--repository',str(root)])
     assert result.exit_code!=0 and snapshot(root)==before
 
 
 def test_learn_preserves_provenance_idempotency_and_candidate_status(tmp_path):
     root=repo(tmp_path); init(root); seed(root)
-    with sqlite3.connect(root/'.reflex/reflex.db') as db:
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db:
         before=[tuple(r) for r in db.execute('SELECT * FROM session_events')]
     args=['learn','--repository',str(root),'--session-id','synthetic-session']
     first=cli.invoke(app,args); second=cli.invoke(app,args)
     assert first.exit_code==second.exit_code==0,(first.output,second.output)
-    with sqlite3.connect(root/'.reflex/reflex.db') as db:
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db:
         assert db.execute('SELECT COUNT(*) FROM lessons').fetchone()[0]==1
         assert db.execute('SELECT status FROM lessons').fetchone()[0]=='candidate'
         assert db.execute('SELECT COUNT(*) FROM failures').fetchone()[0]==1
@@ -133,7 +133,7 @@ def test_learn_expected_errors_are_clear_and_do_not_create_lessons(tmp_path,kind
     if kind!='missing': seed(root,corrected=kind!='no-correction',other_repository=tmp_path/'elsewhere' if kind=='wrong-repository' else None)
     result=cli.invoke(app,['learn','--repository',str(root),'--session-id','synthetic-session'])
     assert result.exit_code!=0 and 'Traceback' not in result.output
-    with sqlite3.connect(root/'.reflex/reflex.db') as db: assert db.execute('SELECT COUNT(*) FROM lessons').fetchone()[0]==0
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db: assert db.execute('SELECT COUNT(*) FROM lessons').fetchone()[0]==0
 
 
 def test_required_arguments_and_invalid_case_are_nonzero(tmp_path):
@@ -144,7 +144,7 @@ def test_required_arguments_and_invalid_case_are_nonzero(tmp_path):
 
 def test_replay_preview_is_nonmutating_and_does_not_start_provider(tmp_path,monkeypatch):
     root=repo(tmp_path); identity,digest=lesson(root); p=plan(root,tmp_path,identity,digest)
-    import reflex.replay.runner as runners
+    import retryloom.replay.runner as runners
     monkeypatch.setattr(runners.CodexRunner,'run',lambda *a,**k: pytest.fail('provider started'))
     before=snapshot(root); result=replay(root,p)
     assert result.exit_code==0,result.output
@@ -182,9 +182,9 @@ def test_controlled_cli_e2e_uses_engine_persistence_evaluation_stats_without_pro
     root=repo(tmp_path); identity,digest=lesson(root)
     changes={} if baseline_ok else {'checks':[{'name':'pass','command':[sys.executable,'-B','-c','pass'],'required':True,'timeout_seconds':10}]}
     p=plan(root,tmp_path,identity,digest,**changes)
-    import reflex.replay.runner as runners
+    import retryloom.replay.runner as runners
     FixtureRunner.calls=[]; monkeypatch.setattr(runners,'CodexRunner',FixtureRunner)
-    dbpath=root/'.reflex/reflex.db'; excluded=tuple(Path(str(dbpath)+s) for s in ['', '-wal','-shm','-journal'])
+    dbpath=root/'.retryloom/retryloom.db'; excluded=tuple(Path(str(dbpath)+s) for s in ['', '-wal','-shm','-journal'])
     before=repository_state(root,excluded_paths=excluded)
     result=replay(root,p,'--execute')
     assert result.exit_code==(0 if baseline_ok else 1),result.output
@@ -216,9 +216,9 @@ def test_replay_validation_errors_do_not_echo_sensitive_input(tmp_path):
 
 
 def test_missing_usage_and_order_preserved_by_session_reader(tmp_path):
-    from reflex.storage.repository import load_session
+    from retryloom.storage.repository import load_session
     root=repo(tmp_path); init(root); original=seed(root)
-    with connect(root/'.reflex/reflex.db') as db:
+    with connect(root/'.retryloom/retryloom.db') as db:
         loaded=load_session(db,original.id)
     assert loaded.events==original.events
     assert loaded.token_input is loaded.token_output is loaded.token_total is None
@@ -227,7 +227,7 @@ def test_missing_usage_and_order_preserved_by_session_reader(tmp_path):
 
 def test_frozen_candidate_mutation_prevents_cli_replay(tmp_path):
     root=repo(tmp_path); identity,digest=lesson(root); p=plan(root,tmp_path,identity,digest)
-    with sqlite3.connect(root/'.reflex/reflex.db') as db:
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db:
         db.execute('UPDATE lessons SET rule=? WHERE id=?',('modified frozen guidance',identity))
     before=snapshot(root); result=replay(root,p,'--execute')
     assert result.exit_code!=0 and snapshot(root)==before
@@ -235,14 +235,14 @@ def test_frozen_candidate_mutation_prevents_cli_replay(tmp_path):
 
 def test_agent_failure_is_preserved_and_returns_nonzero(tmp_path,monkeypatch):
     root=repo(tmp_path); identity,digest=lesson(root); p=plan(root,tmp_path,identity,digest)
-    import reflex.replay.runner as runners
+    import retryloom.replay.runner as runners
     class FailedRunner(FixtureRunner):
         def run(self,*args,**kwargs):
             return RunResult(success=False,exit_code=None,elapsed_seconds=0,stdout='',stderr='fixture unavailable',agent='codex',agent_error='fixture unavailable',efficiency_usable=False)
     monkeypatch.setattr(runners,'CodexRunner',FailedRunner)
     result=replay(root,p,'--execute')
     assert result.exit_code!=0 and 'AGENT_ERROR' in result.output
-    with sqlite3.connect(root/'.reflex/reflex.db') as db:
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db:
         assert db.execute('SELECT status FROM lessons').fetchone()[0]=='candidate'
         assert db.execute('SELECT COUNT(*) FROM evaluations').fetchone()[0]==1
 
@@ -264,12 +264,12 @@ def test_full_controlled_cli_path_imports_canonical_synthetic_source(tmp_path,mo
     assert 'Imported: 1' in first.output and 'Imported: 0' in again.output
     learned=cli.invoke(app,['learn','--repository',str(root),'--session-id','synthetic-import'])
     assert learned.exit_code==0,learned.output
-    with sqlite3.connect(root/'.reflex/reflex.db') as db:
+    with sqlite3.connect(root/'.retryloom/retryloom.db') as db:
         identity,digest=db.execute('SELECT id,lesson_hash FROM lessons').fetchone()
         assert db.execute('SELECT COUNT(*) FROM sessions').fetchone()[0]==1
         assert db.execute('SELECT COUNT(*) FROM failures').fetchone()[0]==1
     p=plan(root,tmp_path,identity,digest)
-    import reflex.replay.runner as runners
+    import retryloom.replay.runner as runners
     monkeypatch.setattr(runners,'CodexRunner',FixtureRunner)
     result=replay(root,p,'--execute'); assert result.exit_code==0,result.output
     stats=cli.invoke(app,['stats','--repository',str(root)])
@@ -280,7 +280,7 @@ def test_full_controlled_cli_path_imports_canonical_synthetic_source(tmp_path,mo
 @pytest.mark.parametrize('command',['init','learn','replay','stats','apply'])
 def test_wal_database_is_rejected_without_creating_sidecars(tmp_path,command):
     root=repo(tmp_path); identity,digest=lesson(root); p=plan(root,tmp_path,identity,digest)
-    db=sqlite3.connect(root/'.reflex/reflex.db'); db.execute('PRAGMA journal_mode=WAL'); db.close()
+    db=sqlite3.connect(root/'.retryloom/retryloom.db'); db.execute('PRAGMA journal_mode=WAL'); db.close()
     before=snapshot(root)
     args=[command,'--repository',str(root)]
     if command=='learn': args += ['--session-id','synthetic-session']
@@ -292,7 +292,7 @@ def test_wal_database_is_rejected_without_creating_sidecars(tmp_path,command):
 
 def test_scan_rejects_external_storage_symlink(tmp_path):
     root=repo(tmp_path); outside=tmp_path/'external'; outside.mkdir()
-    (root/'.reflex').symlink_to(outside,target_is_directory=True)
+    (root/'.retryloom').symlink_to(outside,target_is_directory=True)
     source=tmp_path/'empty';source.mkdir()
     result=cli.invoke(app,['scan','--repository',str(root),'--source-root',str(source)])
     assert result.exit_code!=0 and not list(outside.iterdir())
@@ -300,7 +300,7 @@ def test_scan_rejects_external_storage_symlink(tmp_path):
 
 def test_replay_case_id_reuse_must_preserve_original_case_inputs(tmp_path,monkeypatch):
     root=repo(tmp_path); identity,digest=lesson(root); p=plan(root,tmp_path,identity,digest)
-    import reflex.replay.runner as runners
+    import retryloom.replay.runner as runners
     monkeypatch.setattr(runners,'CodexRunner',FixtureRunner)
     first=replay(root,p,'--execute'); assert first.exit_code==0,first.output
     before=snapshot(root); same=replay(root,p); assert same.exit_code==0,same.output
@@ -320,7 +320,7 @@ def test_partial_repository_is_rejected_without_running_provider(tmp_path):
 
 
 def test_scan_bad_database_returns_clear_error_not_traceback(tmp_path):
-    root=repo(tmp_path); (root/'.reflex').mkdir(); (root/'.reflex/reflex.db').write_text('not a database')
+    root=repo(tmp_path); (root/'.retryloom').mkdir(); (root/'.retryloom/retryloom.db').write_text('not a database')
     source=tmp_path/'empty'; source.mkdir()
     result=cli.invoke(app,['scan','--repository',str(root),'--source-root',str(source)])
     assert result.exit_code==1 and 'Scan failed:' in result.output and 'Traceback' not in result.output

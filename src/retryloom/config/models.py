@@ -13,7 +13,7 @@ class ReplayConfig(BaseModel):
 class EvaluationConfig(BaseModel):
     token_reduction_threshold: float = Field(default=0.15, ge=0, le=1)
 
-class ReflexConfig(BaseModel):
+class RetryloomConfig(BaseModel):
     version: int = 1
     project: ProjectConfig = Field(default_factory=ProjectConfig)
     replay: ReplayConfig = Field(default_factory=ReplayConfig)

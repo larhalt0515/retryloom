@@ -1,7 +1,7 @@
 import subprocess
 
-from reflex.git.clone import CloneError, CloneManager
-from reflex.git.repository import repository_state
+from retryloom.git.clone import CloneError, CloneManager
+from retryloom.git.repository import repository_state
 
 
 def git(root, *args):
@@ -13,7 +13,7 @@ def make_repository(tmp_path):
     root.mkdir()
     git(root, "init", "-q")
     git(root, "config", "user.email", "test@example.invalid")
-    git(root, "config", "user.name", "Reflex Test")
+    git(root, "config", "user.name", "Retryloom Test")
     (root / "tracked.txt").write_text("base\n")
     git(root, "add", "tracked.txt")
     git(root, "commit", "-qm", "base")
@@ -28,7 +28,7 @@ def test_each_run_is_an_independent_clone_and_original_is_unchanged(tmp_path):
     manager = CloneManager(source, tmp_path / "replay")
 
     first = manager.create("control-1", base_commit)
-    second = manager.create("reflex-1", base_commit)
+    second = manager.create("retryloom-1", base_commit)
     (first / "tracked.txt").write_text("changed in first\n")
     git(first, "add", "tracked.txt")
     (second / "tracked.txt").write_text("changed in second\n")
@@ -51,7 +51,7 @@ def test_cleanup_failure_is_reported_and_does_not_claim_removal(tmp_path, monkey
     def fail_rmtree(path):
         raise OSError("forced cleanup failure")
 
-    monkeypatch.setattr("reflex.git.clone.shutil.rmtree", fail_rmtree)
+    monkeypatch.setattr("retryloom.git.clone.shutil.rmtree", fail_rmtree)
     result = manager.cleanup(clone)
 
     assert result.removed is False

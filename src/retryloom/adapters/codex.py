@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from reflex.models import Session, SessionEvent
+from retryloom.models import Session, SessionEvent
 
 _EXIT_CODE = re.compile(
     r"(?:process\s+)?(?:exited?\s+with\s+code|exit(?:ed)?\s+code|return\s+code)\s*[:=]?\s*(-?\d+)",

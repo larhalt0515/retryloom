@@ -6,10 +6,10 @@ import sqlite3
 
 import pytest
 
-from reflex.application import preview_apply, commit_apply
-from reflex.storage.lifecycle import load_lesson_state
-from reflex.storage.database import connect
-from reflex.storage.repository import save_lesson, save_evaluation, save_replay
+from retryloom.application import preview_apply, commit_apply
+from retryloom.storage.lifecycle import load_lesson_state
+from retryloom.storage.database import connect
+from retryloom.storage.repository import save_lesson, save_evaluation, save_replay
 from test_lesson_storage import setup
 from test_evaluation_storage import recorded_report
 
@@ -24,7 +24,7 @@ def eligible(tmp_path):
     # Evidence repository must match candidate generation context.
     db.execute('UPDATE sessions SET repository=?', (str(root),))
     db.commit()
-    from reflex.analysis.lessons import generate_candidate
+    from retryloom.analysis.lessons import generate_candidate
     evidence = [item.model_copy(update={'repository': str(root)}) for item in evidence]
     lesson = save_lesson(db, generate_candidate(evidence), evidence)
     case, report = recorded_report()
@@ -37,7 +37,7 @@ def eligible(tmp_path):
         run.metadata['manifest_hash'] = digest
         run.result.lesson_hash = lesson.lesson_hash
     save_replay(db, case, report)
-    from reflex.replay.evaluator import evaluate
+    from retryloom.replay.evaluator import evaluate
     evaluation = evaluate(report)
     assert evaluation.status == 'replay_confirmed'
     save_evaluation(db, report, evaluation)
@@ -46,11 +46,11 @@ def eligible(tmp_path):
     return db, root, lesson
 
 
-@pytest.mark.parametrize('target', ['AGENTS.md','CLAUDE.md','.reflex/skills/'])
+@pytest.mark.parametrize('target', ['AGENTS.md','CLAUDE.md','.retryloom/skills/'])
 def test_confirmation_preserves_files_freeze_and_proof(eligible, target):
     db, root, lesson = eligible
     path = root / target
-    if target != '.reflex/skills/':
+    if target != '.retryloom/skills/':
         path.write_bytes(b'# Existing instructions\nKeep this.\n')
     tables = ('lesson_freezes','lesson_audits','replay_reports','replay_runs','evaluations')
     snapshots = {t: [tuple(r) for r in db.execute(f'SELECT * FROM {t}')] for t in tables}
@@ -62,7 +62,7 @@ def test_confirmation_preserves_files_freeze_and_proof(eligible, target):
     assert load_lesson_state(db, lesson.id).effective_status == 'replay_confirmed'
     assert commit_apply(db, preview, True).status == 'applied'
     assert (root / preview.target).read_bytes() == preview.after
-    if target != '.reflex/skills/':
+    if target != '.retryloom/skills/':
         assert preview.after.startswith(b'# Existing instructions\nKeep this.\n')
     state = load_lesson_state(db, lesson.id)
     assert state.effective_status == 'applied' and state.frozen_lesson == lesson
@@ -80,7 +80,7 @@ def test_ineligible(eligible,status):
     with pytest.raises(ValueError): preview_apply(db,root,lesson.id)
 
 
-@pytest.mark.parametrize('target',['../AGENTS.md','/tmp/AGENTS.md','other.md','.reflex/skills/../evil.md'])
+@pytest.mark.parametrize('target',['../AGENTS.md','/tmp/AGENTS.md','other.md','.retryloom/skills/../evil.md'])
 def test_unsafe_target(eligible,target):
     db, root, lesson = eligible
     with pytest.raises(ValueError): preview_apply(db,root,lesson.id,target)
@@ -103,8 +103,8 @@ def test_symlink_and_hardlink_and_directory(eligible,tmp_path):
 def test_parent_symlink(eligible,tmp_path):
     db,root,lesson=eligible
     outside=tmp_path/'elsewhere';outside.mkdir()
-    (root/'.reflex').symlink_to(outside,target_is_directory=True)
-    with pytest.raises(ValueError): preview_apply(db,root,lesson.id,'.reflex/skills/')
+    (root/'.retryloom').symlink_to(outside,target_is_directory=True)
+    with pytest.raises(ValueError): preview_apply(db,root,lesson.id,'.retryloom/skills/')
     assert list(outside.iterdir()) == []
 
 
@@ -139,7 +139,7 @@ def test_write_failure(eligible,monkeypatch):
     db,root,lesson=eligible
     preview=preview_apply(db,root,lesson.id)
     def fail(*args): raise OSError('write failed')
-    monkeypatch.setattr('reflex.application._replace_at',fail)
+    monkeypatch.setattr('retryloom.application._replace_at',fail)
     with pytest.raises(OSError): commit_apply(db,preview,True)
     assert not (root/'AGENTS.md').exists()
     assert load_lesson_state(db,lesson.id).effective_status == 'replay_confirmed'
@@ -148,7 +148,7 @@ def test_write_failure(eligible,monkeypatch):
 def test_verification_failure_preserves_concurrent_edit(eligible,monkeypatch):
     db,root,lesson=eligible
     preview=preview_apply(db,root,lesson.id)
-    import reflex.application as application
+    import retryloom.application as application
     original=application._replace_at
     def concurrent(fd,name,content,mode,*guard):
         original(fd,name,content,mode,*guard)
@@ -165,7 +165,7 @@ def test_rollback_failure_explicit(eligible,monkeypatch):
     (root/'AGENTS.md').write_text('original')
     preview=preview_apply(db,root,lesson.id)
     db.execute("CREATE TRIGGER deny_apply BEFORE INSERT ON applications BEGIN SELECT RAISE(ABORT,'injected'); END");db.commit()
-    import reflex.application as application
+    import retryloom.application as application
     original=application._replace_at
     calls=[]
     def fail_rollback(*args):
@@ -220,7 +220,7 @@ def test_applied_noop_after_other_guidance_appended(eligible):
 
 def test_open_parent_never_recreates_repository(eligible):
     db,root,lesson=eligible
-    import reflex.application as application
+    import retryloom.application as application
     preview=preview_apply(db,root,lesson.id)
     root.rmdir()
     with pytest.raises(ValueError,match='disappeared|identity changed'):
@@ -238,8 +238,8 @@ def test_application_audit_fields_validated(eligible,field,value):
 
 def test_detached_parent_rollback_does_not_restore_outside(eligible,monkeypatch,tmp_path):
     db,root,lesson=eligible
-    import reflex.application as application
-    preview=preview_apply(db,root,lesson.id,'.reflex/skills/')
+    import retryloom.application as application
+    preview=preview_apply(db,root,lesson.id,'.retryloom/skills/')
     original=application._replace_at
     moved=tmp_path/'detached-skills'
     def detach(fd,name,content,mode,*guard):

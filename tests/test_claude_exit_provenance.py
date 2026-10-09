@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from reflex.adapters.claude import ClaudeAdapter
-from reflex.analysis.failures import detect_failure
+from retryloom.adapters.claude import ClaudeAdapter
+from retryloom.analysis.failures import detect_failure
 
 
 def parse_results(tmp_path, blocks, extra=None):

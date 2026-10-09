@@ -1,4 +1,4 @@
-"""Reflex command-line entry point."""
+"""Retryloom command-line entry point."""
 
 from __future__ import annotations
 
@@ -8,11 +8,11 @@ import subprocess
 import sqlite3
 from pydantic import ValidationError
 from contextlib import closing
-from reflex.git.repository import _git
-from reflex.adapters.claude import ClaudeAdapter
-from reflex.adapters.codex import CodexAdapter
-from reflex.storage.database import connect, initialize_schema
-from reflex.storage.repository import save_session
+from retryloom.git.repository import _git
+from retryloom.adapters.claude import ClaudeAdapter
+from retryloom.adapters.codex import CodexAdapter
+from retryloom.storage.database import connect, initialize_schema
+from retryloom.storage.repository import save_session
 
 app = typer.Typer(help="Learn reusable coding-agent lessons through fair replay.")
 
@@ -44,11 +44,11 @@ def _error_summary(error: Exception) -> str:
 
 @app.command()
 def init(repository: Path = typer.Option(Path("."))) -> None:
-    """Initialize Reflex storage in a Git repository."""
-    from reflex.cli_workflows import initialize_project, agent_cli_availability
+    """Initialize Retryloom storage in a Git repository."""
+    from retryloom.cli_workflows import initialize_project, agent_cli_availability
     try:
         root = initialize_project(repository)
-        typer.echo(f"Initialized Reflex: {root / '.reflex'}")
+        typer.echo(f"Initialized Retryloom: {root / '.retryloom'}")
         availability = agent_cli_availability()
         typer.echo("Agent CLIs (PATH lookup only): " + "; ".join(
             f"{agent}={'available' if found else 'unavailable'}" for agent, found in availability.items()))
@@ -68,7 +68,7 @@ def scan(agent: str = typer.Option("codex"), source_root: Path | None = typer.Op
         raise typer.BadParameter("repository must be a Git repository")
     adapter = ClaudeAdapter(source_root) if agent == "claude" else CodexAdapter(source_root)
     imported = skipped = rejected = 0
-    from reflex.cli_workflows import guard_storage
+    from retryloom.cli_workflows import guard_storage
     try:
         database_path = guard_storage(root)
     except (ValueError, OSError) as error:
@@ -105,7 +105,7 @@ def scan(agent: str = typer.Option("codex"), source_root: Path | None = typer.Op
 @app.command()
 def learn(session_id: str = typer.Option(...), repository: Path = typer.Option(Path("."))) -> None:
     """Generate candidate lessons from detected failures."""
-    from reflex.cli_workflows import learn_session
+    from retryloom.cli_workflows import learn_session
     try:
         for lesson in learn_session(repository, session_id):
             typer.echo(f"Lesson {lesson.id}: {lesson.status}; hash={lesson.lesson_hash}; audit={lesson.audit.status}")
@@ -121,7 +121,7 @@ def replay(
     execute: bool = typer.Option(False, help="Explicitly authorize agent execution and local result writes."),
 ) -> None:
     """Replay a task under CONTROL and REFLEX conditions."""
-    from reflex.cli_workflows import replay_preflight, execute_replay
+    from retryloom.cli_workflows import replay_preflight, execute_replay
     try:
         root, plan, frozen = replay_preflight(repository, case)
         typer.echo(f"Replay plan {plan.id}: repository={root}; commit={plan.base_commit}; lesson={plan.lesson_id}; runs={plan.runs} per arm")
@@ -153,19 +153,19 @@ def _project_root(repository: Path) -> Path:
 
 def _read_project(root: Path, *, allow_empty: bool = False):
     """Open existing evidence read-only; never initialize a project during preview."""
-    directory = root / ".reflex"
-    path = directory / "reflex.db"
+    directory = root / ".retryloom"
+    path = directory / "retryloom.db"
     if directory.is_symlink() or path.is_symlink():
-        raise ValueError("Reflex storage must not be a symlink")
+        raise ValueError("Retryloom storage must not be a symlink")
     if not path.exists():
         if not allow_empty:
-            raise ValueError("Reflex database is missing")
+            raise ValueError("Retryloom database is missing")
         connection = sqlite3.connect(":memory:")
         initialize_schema(connection)
     else:
         if not path.is_file():
-            raise ValueError("Reflex database must be a regular file")
-        from reflex.cli_workflows import guard_read_only_database
+            raise ValueError("Retryloom database must be a regular file")
+        from retryloom.cli_workflows import guard_read_only_database
         guard_read_only_database(path)
         connection = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
     connection.row_factory = sqlite3.Row
@@ -181,7 +181,7 @@ def apply(
     preview: bool = typer.Option(False, help="Show the proposed change without applying."),
 ) -> None:
     """Apply a replay-confirmed lesson after review."""
-    from reflex.application import preview_apply, commit_apply
+    from retryloom.application import preview_apply, commit_apply
     root = _project_root(repository)
     try:
         with closing(_read_project(root)) as connection:
@@ -195,15 +195,15 @@ def apply(
                 typer.echo("Select one with --lesson-id; application requires a preview and confirmation.")
                 return
             if target is None:
-                from reflex.config.loader import load_config
-                config_path = root / ".reflex/config.toml"
+                from retryloom.config.loader import load_config
+                config_path = root / ".retryloom/config.toml"
                 if config_path.is_symlink():
-                    raise ValueError("Reflex configuration must not be a symlink")
+                    raise ValueError("Retryloom configuration must not be a symlink")
                 agent = load_config(config_path).project.default_agent.casefold() if config_path.exists() else "codex"
                 if agent not in {"codex", "claude"}:
                     raise ValueError("default agent must be codex or claude")
                 target = "CLAUDE.md" if agent == "claude" else "AGENTS.md"
-            destination = ".reflex/skills/" if target == "skills" else target
+            destination = ".retryloom/skills/" if target == "skills" else target
             proposal = preview_apply(connection, root, lesson_id, target=destination)
             typer.echo(f"Target: {proposal.repository / proposal.target}")
             typer.echo(proposal.diff or "No textual change proposed.")
@@ -218,7 +218,7 @@ def apply(
         # Revalidate storage after confirmation before opening it for writes.
         with closing(_read_project(root)):
             pass
-        with closing(connect(root / ".reflex" / "reflex.db")) as connection:
+        with closing(connect(root / ".retryloom" / "retryloom.db")) as connection:
             outcome = commit_apply(connection, proposal, confirmed=True)
         typer.echo(f"Application completed: {outcome.status}")
     except (ValueError, OSError, sqlite3.Error, RuntimeError) as error:
@@ -228,8 +228,8 @@ def apply(
 
 @app.command()
 def stats(repository: Path = typer.Option(Path("."))) -> None:
-    """Show measured Reflex statistics."""
-    from reflex.output.stats import collect_stats
+    """Show measured Retryloom statistics."""
+    from retryloom.output.stats import collect_stats
     root = _project_root(repository)
     try:
         with closing(_read_project(root, allow_empty=True)) as connection:

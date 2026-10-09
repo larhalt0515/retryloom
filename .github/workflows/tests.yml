@@ -35,7 +35,7 @@ jobs:
       - name: Check all command help pages
         shell: bash
         run: |
-          reflex --help
+          retryloom --help
           for command in init scan learn replay apply stats; do
-            reflex "$command" --help
+            retryloom "$command" --help
           done

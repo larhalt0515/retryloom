@@ -3,13 +3,13 @@ import json
 import hashlib
 import sqlite3
 from datetime import datetime, timezone
-from reflex.models import Session, FailureEvent
-from reflex.replay.models import CheckResult, Evaluation, ReplayCase, ReplayReport, ReplayRun, RunResult
+from retryloom.models import Session, FailureEvent
+from retryloom.replay.models import CheckResult, Evaluation, ReplayCase, ReplayReport, ReplayRun, RunResult
 
 
 def load_session(connection: sqlite3.Connection, session_id: str) -> Session:
     """Restore imported event order without reparsing or rewriting source history."""
-    from reflex.models import SessionEvent
+    from retryloom.models import SessionEvent
     cursor = connection.execute("SELECT * FROM sessions WHERE id=?", (session_id,))
     row = cursor.fetchone()
     if row is None:
@@ -142,7 +142,7 @@ def save_evaluation(connection: sqlite3.Connection, report: ReplayReport,
                 evaluation.evidence.get("case_id") != report.case_id or
                 evaluation.evidence.get("manifest_hash") != report.metadata.get("manifest_hash")):
             raise ValueError("evaluation linkage differs from replay report")
-        from reflex.replay.evaluator import evaluate
+        from retryloom.replay.evaluator import evaluate
         if evaluation.model_dump() != evaluate(stored).model_dump():
             raise ValueError("evaluation differs from deterministic recorded-evidence result")
         report_json = json.dumps(stored.model_dump(mode="json"), sort_keys=True, allow_nan=False)
@@ -202,9 +202,9 @@ def load_lesson(connection: sqlite3.Connection, lesson_id: str):
 
 def _load_frozen_lesson(connection: sqlite3.Connection, lesson_id: str, *, check_status: bool = True):
     """Verify immutable evidence; lifecycle readers separately verify status proof."""
-    from reflex.models import Lesson, LessonAudit
-    from reflex.analysis.lessons import fingerprint, lesson_fingerprint
-    from reflex.replay.injection import FrozenLesson
+    from retryloom.models import Lesson, LessonAudit
+    from retryloom.analysis.lessons import fingerprint, lesson_fingerprint
+    from retryloom.replay.injection import FrozenLesson
     row = _lesson_row(connection, lesson_id)
     if not row["lesson_json"]:
         raise ValueError("legacy lesson has no frozen context/audit; explicit migration review required")
@@ -227,7 +227,7 @@ def _load_frozen_lesson(connection: sqlite3.Connection, lesson_id: str, *, check
     snapshot = json.loads(stored["evidence_json"])
     if fingerprint(snapshot) != lesson.historical_evidence_fingerprint:
         raise ValueError("stored historical evidence fingerprint mismatch")
-    from reflex.models import LessonEvidenceRef
+    from retryloom.models import LessonEvidenceRef
     selected = tuple(LessonEvidenceRef(**{key: item[key] for key in LessonEvidenceRef.model_fields})
                      for item in snapshot)
     if selected != lesson.evidence_refs or tuple(ref.evidence_hash for ref in selected) != audit.evidence_hashes:
@@ -257,8 +257,8 @@ def verify_managed_lesson(connection: sqlite3.Connection, lesson_id: str):
 
 def save_lesson(connection: sqlite3.Connection, lesson, evidence):
     """Audit and freeze once. Public saves never promote or overwrite a lesson."""
-    from reflex.analysis.lessons import _freeze_audited, evidence_snapshot
-    from reflex.analysis.leakage import audit_lesson
+    from retryloom.analysis.lessons import _freeze_audited, evidence_snapshot
+    from retryloom.analysis.leakage import audit_lesson
     _verify_selected_history(connection, evidence)
     frozen = _freeze_audited(lesson, evidence)
     if audit_lesson(frozen, evidence) != frozen.audit:
@@ -272,7 +272,7 @@ def save_lesson(connection: sqlite3.Connection, lesson, evidence):
     snapshot = evidence_snapshot(evidence)
     if len(snapshot) != len(frozen.evidence_refs):
         raise ValueError("cannot persist a lesson without complete usable evidence")
-    from reflex.analysis.lessons import fingerprint
+    from retryloom.analysis.lessons import fingerprint
     with connection:
         connection.execute(
             "INSERT INTO lessons(id,scope,trigger_json,rule,evidence_sessions_json,confidence,status,"
@@ -294,8 +294,8 @@ def save_lesson(connection: sqlite3.Connection, lesson, evidence):
 
 
 def _verify_current_evidence(lesson, evidence) -> None:
-    from reflex.analysis.lessons import evidence_snapshot, fingerprint
-    from reflex.analysis.leakage import audit_lesson
+    from retryloom.analysis.lessons import evidence_snapshot, fingerprint
+    from retryloom.analysis.leakage import audit_lesson
     if fingerprint(evidence_snapshot(evidence)) != lesson.historical_evidence_fingerprint:
         raise ValueError("current evidence differs from frozen historical evidence")
     if audit_lesson(lesson, evidence) != lesson.audit:
@@ -303,7 +303,7 @@ def _verify_current_evidence(lesson, evidence) -> None:
 
 
 def prepare_lesson_for_replay(connection: sqlite3.Connection, lesson_id: str, evidence):
-    from reflex.replay.injection import FrozenLesson
+    from retryloom.replay.injection import FrozenLesson
     lesson = load_lesson(connection, lesson_id)
     _verify_current_evidence(lesson, evidence)
     if lesson.status == "rejected" or lesson.audit.status == "REJECT":
@@ -343,9 +343,9 @@ def _verify_selected_history(connection: sqlite3.Connection, evidence) -> None:
     This check happens before creation; historical snapshots stay immutable when
     a session is later reimported. Raw history never enters the lesson snapshot.
     """
-    from reflex.models import SessionEvent
-    from reflex.analysis.lessons import evidence_items, usable
-    from reflex.analysis.corrections import extract_corrections
+    from retryloom.models import SessionEvent
+    from retryloom.analysis.lessons import evidence_items, usable
+    from retryloom.analysis.corrections import extract_corrections
     items = evidence_items(evidence)
     if not items:
         raise ValueError("complete selected correction evidence is required")

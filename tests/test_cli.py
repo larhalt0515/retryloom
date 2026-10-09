@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from reflex.main import app
+from retryloom.main import app
 
 
 runner = CliRunner()
@@ -20,6 +20,6 @@ def test_command_is_callable(tmp_path) -> None:
     result = runner.invoke(app, ["init", "--repository", str(tmp_path)])
 
     assert result.exit_code == 0, result.output
-    assert "Initialized Reflex" in result.stdout
-    assert (tmp_path / ".reflex/reflex.db").is_file()
+    assert "Initialized Retryloom" in result.stdout
+    assert (tmp_path / ".retryloom/retryloom.db").is_file()
 

@@ -10,7 +10,7 @@ absent from source_before and removed diff lines are suspect.
 import re
 import unicodedata
 
-from reflex.models import Lesson, LessonAudit
+from retryloom.models import Lesson, LessonAudit
 from .lessons import (TEMPLATES, canonical_rule, evidence_items, evidence_references,
                       usable)
 

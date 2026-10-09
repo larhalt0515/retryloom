@@ -9,21 +9,21 @@ import shutil
 import sqlite3
 import stat
 
-from reflex.analysis.corrections import extract_corrections
-from reflex.analysis.failures import detect_failure
-from reflex.analysis.lessons import generate_candidate
-from reflex.config.loader import DEFAULT_CONFIG, load_config
-from reflex.git.repository import ensure_repository
-from reflex.replay.engine import ReplayEngine
-from reflex.replay.evaluator import evaluate
-from reflex.replay.isolation import git_command
-from reflex.replay.models import ReplayCase
-from reflex.storage.database import connect
-from reflex.storage.repository import (
+from retryloom.analysis.corrections import extract_corrections
+from retryloom.analysis.failures import detect_failure
+from retryloom.analysis.lessons import generate_candidate
+from retryloom.config.loader import DEFAULT_CONFIG, load_config
+from retryloom.git.repository import ensure_repository
+from retryloom.replay.engine import ReplayEngine
+from retryloom.replay.evaluator import evaluate
+from retryloom.replay.isolation import git_command
+from retryloom.replay.models import ReplayCase
+from retryloom.storage.database import connect
+from retryloom.storage.repository import (
     load_failure, load_lesson, load_replay_report, load_session,
     prepare_lesson_for_replay, save_evaluation, save_failure, save_lesson,
 )
-from reflex.storage.schema import SCHEMA_VERSION
+from retryloom.storage.schema import SCHEMA_VERSION
 
 OWNED_DIRS = ("lessons", "replays", "reports", "logs")
 
@@ -44,12 +44,12 @@ def project_root(repository: Path) -> Path:
 
 def guard_storage(root: Path) -> Path:
     """Inspect lexical targets before SQLite or mkdir can follow them."""
-    directory = root / ".reflex"
+    directory = root / ".retryloom"
     targets = [(directory, True)]
     targets.extend((directory / name, True) for name in OWNED_DIRS)
     targets.extend((directory / name, False) for name in
-                   ("config.toml", ".gitignore", "reflex.db", "reflex.db-wal",
-                    "reflex.db-shm", "reflex.db-journal"))
+                   ("config.toml", ".gitignore", "retryloom.db", "retryloom.db-wal",
+                    "retryloom.db-shm", "retryloom.db-journal"))
     for path, is_directory in targets:
         try:
             info = path.lstat()
@@ -70,8 +70,8 @@ def guard_storage(root: Path) -> Path:
                 if stat.S_ISDIR(info.st_mode):
                     continue
                 if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-                    raise ValueError(f"unsafe Reflex descendant: {path}")
-    return directory / "reflex.db"
+                    raise ValueError(f"unsafe Retryloom descendant: {path}")
+    return directory / "retryloom.db"
 
 
 def guard_read_only_database(path: Path) -> None:
@@ -89,7 +89,7 @@ def guard_read_only_database(path: Path) -> None:
 def read_database(root: Path) -> sqlite3.Connection:
     path = guard_storage(root)
     if not path.is_file():
-        raise ValueError("Reflex database is missing; run init first")
+        raise ValueError("Retryloom database is missing; run init first")
     guard_read_only_database(path)
     connection = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
     connection.row_factory = sqlite3.Row
@@ -100,7 +100,7 @@ def read_database(root: Path) -> sqlite3.Connection:
 def write_database(root: Path) -> sqlite3.Connection:
     path = guard_storage(root)
     if not path.is_file():
-        raise ValueError("Reflex database is missing; run init first")
+        raise ValueError("Retryloom database is missing; run init first")
     connection = sqlite3.connect(path.as_uri() + "?mode=rw", uri=True)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys=ON")
@@ -253,9 +253,9 @@ def replay_preflight(repository: Path, case_path: Path):
 
 
 def execute_replay(root: Path, case: ReplayCase, frozen):
-    from reflex.replay.runner import CodexRunner
+    from retryloom.replay.runner import CodexRunner
     with closing(write_database(root)) as connection:
-        database_path = root / ".reflex" / "reflex.db"
+        database_path = root / ".retryloom" / "retryloom.db"
         identities = {path: (path.stat().st_dev, path.stat().st_ino)
                       for path in (root, database_path.parent, database_path)}
         _verify_case_identity(connection, root, case)

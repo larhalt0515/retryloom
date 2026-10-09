@@ -7,14 +7,14 @@ import sqlite3
 import pytest
 from pydantic import ValidationError
 
-from reflex.analysis.corrections import extract_corrections
-from reflex.analysis.failures import detect_failure
-from reflex.analysis.lessons import generate_candidate
-from reflex.models import Session, SessionEvent
-from reflex.storage.database import connect, initialize_schema
-from reflex.storage.repository import (load_lesson, prepare_lesson_for_replay, resolve_lesson_audit,
+from retryloom.analysis.corrections import extract_corrections
+from retryloom.analysis.failures import detect_failure
+from retryloom.analysis.lessons import generate_candidate
+from retryloom.models import Session, SessionEvent
+from retryloom.storage.database import connect, initialize_schema
+from retryloom.storage.repository import (load_lesson, prepare_lesson_for_replay, resolve_lesson_audit,
                                        save_failure, save_lesson, save_session, verify_managed_lesson)
-from reflex.storage.schema import SCHEMA_SQL
+from retryloom.storage.schema import SCHEMA_SQL
 
 
 def setup(db, session_id="storage-session"):
@@ -198,7 +198,7 @@ def test_v4_migration_preserves_all_existing_rows_and_is_idempotent(tmp_path, ve
 
 
 def test_v4_migration_failure_is_atomic(tmp_path, monkeypatch):
-    import reflex.storage.database as module
+    import retryloom.storage.database as module
     db = sqlite3.connect(tmp_path / "broken.db")
     db.execute("CREATE TABLE metadata(key TEXT PRIMARY KEY,value TEXT)")
     db.execute("INSERT INTO metadata VALUES('schema_version','3')")

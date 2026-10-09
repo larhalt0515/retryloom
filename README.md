@@ -1,7 +1,6 @@
-# Reflex
+# Retryloom
 
-Your coding agent keeps making the same mistakes.
-Reflex makes sure it learns from them.
+Derive lessons from agent failures. Test them through replay.
 
 **Measured synthetic benchmark: 0/3 → 0/3 (CONTROL → REFLEX).
 VALID NEUTRAL RESULT. Improvement in a real coding agent has not been demonstrated.**
@@ -16,9 +15,9 @@ VALID NEUTRAL RESULT. Improvement in a real coding agent has not been demonstrat
 
 See the [benchmark evidence](benchmarks/README.md). This development snapshot is
 **not release-ready**: the [fixed 14-item Release Gate](docs/RELEASE_GATE.md)
-contains failures. The tagline expresses the project's goal, not a proven guarantee.
+has external validation requirements. The tagline describes the workflow, not a proven improvement guarantee.
 
-Reflex is an experimental local framework for deriving, replaying, evaluating,
+Retryloom is an experimental local framework for deriving, replaying, evaluating,
 and applying Lessons from agent failure evidence. The CLI connects the existing
 components; real-provider end-to-end behavior and improvement remain unvalidated.
 
@@ -37,34 +36,34 @@ a live coding agent. These evidence categories are not interchangeable.
 ## Current CLI
 
 Python 3.12+, Git, and macOS or Linux are required. For example, use
-`uv run reflex --help` in the project environment. Help lists all six names;
+`uv run retryloom --help` in the project environment. Help lists all six names;
 appearing in help does not establish implementation.
 
 | Command | Current behavior | Mutation |
 |---|---|---|
-| `reflex init` | Initializes local storage/config in the selected Git root; preserves existing data; idempotent | Required Reflex-owned files/directories only |
-| `reflex scan` | Imports selected-repository Codex/Claude saved sessions; skips existing IDs | Writes local `.reflex/reflex.db` |
-| `reflex learn` | Analyzes an imported `--session-id`, persists evidenced candidates with audit/frozen hash | Local failure/Lesson records; no promotion or Replay |
-| `reflex replay` | Validates `--case` JSON; `--execute` explicitly starts CodexRunner, existing Engine and Evaluator | Preflight is read-only; execution persists Replay/Evaluation, not Lesson status |
-| `reflex apply` | Lists eligible Lessons, previews a selected change, requires confirmation | Confirmed target and application persistence only |
-| `reflex stats` | Reads structured persisted counts and eligible comparison metrics | Read-only |
+| `retryloom init` | Initializes local storage/config in the selected Git root; preserves existing data; idempotent | Required Retryloom-owned files/directories only |
+| `retryloom scan` | Imports selected-repository Codex/Claude saved sessions; skips existing IDs | Writes local `.retryloom/retryloom.db` |
+| `retryloom learn` | Analyzes an imported `--session-id`, persists evidenced candidates with audit/frozen hash | Local failure/Lesson records; no promotion or Replay |
+| `retryloom replay` | Validates `--case` JSON; `--execute` explicitly starts CodexRunner, existing Engine and Evaluator | Preflight is read-only; execution persists Replay/Evaluation, not Lesson status |
+| `retryloom apply` | Lists eligible Lessons, previews a selected change, requires confirmation | Confirmed target and application persistence only |
+| `retryloom stats` | Reads structured persisted counts and eligible comparison metrics | Read-only |
 
 Implemented command examples; substitute your own paths and eligible Lesson ID:
 
 ```sh
-uv run reflex init --repository /path/to/project
-uv run reflex scan --agent codex --repository /path/to/project
-uv run reflex scan --agent claude --repository /path/to/project --source-root /path/to/transcripts
-uv run reflex learn --repository /path/to/project --session-id ID
-uv run reflex replay --repository /path/to/project --case /path/to/case.json
-uv run reflex stats --repository /path/to/project
-uv run reflex apply --repository /path/to/project --lesson-id ID --target AGENTS.md --preview
+uv run retryloom init --repository /path/to/project
+uv run retryloom scan --agent codex --repository /path/to/project
+uv run retryloom scan --agent claude --repository /path/to/project --source-root /path/to/transcripts
+uv run retryloom learn --repository /path/to/project --session-id ID
+uv run retryloom replay --repository /path/to/project --case /path/to/case.json
+uv run retryloom stats --repository /path/to/project
+uv run retryloom apply --repository /path/to/project --lesson-id ID --target AGENTS.md --preview
 ```
 
 `replay --execute` can contact the provider and execute supplied checks; it is not
 a read-only smoke. It does not solve the current host confinement/authentication
 gap. Do not invoke it here to force a live PASS. Case JSON follows
-[ReplayCase](src/reflex/replay/models.py); repository, base_commit, task, checks,
+[ReplayCase](src/retryloom/replay/models.py); repository, base_commit, task, checks,
 lesson_id and lesson_hash are required. Runs default to 3 (minimum 2), agent to
 Codex, and timeout to 1800 seconds. Use a fresh case ID for changed inputs.
 
@@ -74,7 +73,7 @@ automatic refresh is not implemented. Source history is read only. Both adapters
 use the same canonical Session/Event model and database. A missing historical
 base commit stays unavailable; current HEAD is not proof of a historical base.
 
-Apply supports `AGENTS.md`, `CLAUDE.md`, and `--target skills` for `.reflex/skills/`.
+Apply supports `AGENTS.md`, `CLAUDE.md`, and `--target skills` for `.retryloom/skills/`.
 The default instruction file follows the configured agent. Only a recorded
 `replay_confirmed` Lesson with matching frozen content and linked Evaluation is
 eligible. Candidate/rejected Lessons cannot be applied. Preview is non-mutating;
@@ -128,7 +127,7 @@ Every run receives temporary HOME/XDG/CODEX_HOME/state paths. The intentional
 behavioral difference is one frozen Lesson for REFLEX and none for CONTROL.
 Historical corrections/final patches, CONTROL output, and hidden answers are not
 included in REFLEX instructions. Original repository state is checked before/after;
-owned `.reflex` database files are explicit administrative exclusions, not permission
+owned `.retryloom` database files are explicit administrative exclusions, not permission
 for arbitrary source changes.
 
 ### Replay Engine Boundaries
@@ -171,7 +170,7 @@ status uniquely associated with the corresponding result; unknown stays unknown.
 
 ## Privacy
 
-Reflex has no account, telemetry, cloud sync, or automatic session/source upload.
+Retryloom has no account, telemetry, cloud sync, or automatic session/source upload.
 Import, mechanical auditing, deterministic evaluation, and Stats run locally.
 Sessions, commands, tool output, stdout/stderr, and local databases can contain
 secrets; treat them as private and review them before sharing.
@@ -189,7 +188,7 @@ raw private home history, and unrelated private logs are not benchmark artifacts
 - Persistent state isolation depends on CLI redirect support. HOME changes do not prove keychain or every external state store is isolated.
 - Live Codex/Claude are infrastructure blocked here. Nested macOS sandbox execution is unavailable; safety was not weakened to obtain a successful smoke. Provider/auth settings were not changed to bypass it.
 - Historical commits are often absent; consulting today's HEAD cannot establish historical Replay provenance.
-- Read-only workflows reject WAL/non-default SQLite journaling and active recovery state rather than creating sidecars or silently reading stale evidence. Default Reflex storage uses DELETE journaling.
+- Read-only workflows reject WAL/non-default SQLite journaling and active recovery state rather than creating sidecars or silently reading stale evidence. Default Retryloom storage uses DELETE journaling.
 - Filesystem writes and SQLite commits are not one crash-atomic transaction. Guarded restoration handles ordinary failures. A crash may leave Lesson text without an application record; recovery requires a fresh preview/confirmation. Residual replacement races and hostile directory replacement are not completely prevented.
 - The minimal Codex runner retains raw output and leaves unparsed metrics unknown. A canonical authenticated Claude live runner is not complete/verified.
 - Lesson generalization, held-out evaluation, and multi-session automatic promotion are not v0.1 features.
@@ -218,12 +217,12 @@ See [preregistration](benchmarks/results/csv-fixture-neutral-20261008/preregistr
 [Stats](benchmarks/results/csv-fixture-neutral-20261008/stats.json), and
 [artifact hashes](benchmarks/results/csv-fixture-neutral-20261008/artifact-sha256.json).
 The [benchmark guide](benchmarks/README.md) describes reproduction in a fresh
-repository outside Reflex; live authentication is not required for that fixture.
+repository outside Retryloom; live authentication is not required for that fixture.
 
 ## Development and Release Status
 
 ```sh
-uv run reflex --help
+uv run retryloom --help
 uv run pytest
 ```
 
@@ -231,14 +230,41 @@ Phase 11 baseline: **10 focused tests, 397 full-suite tests passed**.
 Release closure validation: **64 focused tests passed; 440 full-suite tests passed
 from the wheel installed into a fresh temporary virtual environment**.
 These regression results do not demonstrate real-agent improvement.
-Reflex now has its own local Git root, with no commit or tag yet; files await
-explicit commit approval. The retained Phase 11 trial predates this initialization
-and identifies its original untracked implementation through source hashes.
+The original Reflex release candidate was committed as `69d939757646bf12645e05d349539acd2eedca3c`
+and published at [larhalt0515/reflex](https://github.com/larhalt0515/reflex).
+The local Retryloom rename awaits commit, public repository rename and push approval.
+The retained Phase 11 trial identifies its original implementation through source hashes.
 
 All [14 Release Gates](docs/RELEASE_GATE.md) must pass. Required external validation
 is not an assumed PASS. CLI wiring is implemented; the [CI workflow](.github/workflows/tests.yml)
 is prepared for deterministic tests on Linux Python 3.12/3.13/3.14 and macOS 3.14.
-Remote CI has not run. Safe live integration, real improvement evidence, a tracked
-commit, and release preparation remain [separate approval checkpoints](docs/FOLLOW_UP.md).
+[GitHub Actions passed all four jobs](https://github.com/larhalt0515/reflex/actions/runs/37793077910) for the original commit above.
+That result does not validate this unpushed rename. Safe live integration, real
+improvement evidence, and release preparation remain [separate approval checkpoints](docs/FOLLOW_UP.md).
 This documentation does not authorize execution, promotion, production Apply,
 push, release, publication, or external artifact transmission.
+
+## Pre-v0.1 identity migration
+
+Local rename validation: **67 focused tests and 443 full-suite tests passed**.
+The full suite used the renamed wheel installed in a fresh Python 3.14 environment.
+All seven help pages, Init/idempotency, empty Stats and expected user errors passed
+outside the checkout. These are offline checks, not authenticated agent evidence.
+
+Retryloom replaces the original Reflex distribution, import namespace and CLI.
+Use a fresh environment: `import retryloom` and `retryloom --help`. New local
+state is `.retryloom/retryloom.db`; old `.reflex/` state and previously applied
+instructions are not automatically moved, rewritten or deleted. No old CLI or
+import alias is supplied. Shared task coordination and model escalation are
+development operating policies, not implemented Retryloom commands or automatic
+routing features.
+
+The immutable historical benchmark still uses `REFLEX` for the Lesson-injected
+arm. This condition label and serialized `reflex_*` fields/SQL columns remain
+record-format identifiers so existing Replay/Evaluation evidence stays readable.
+They are not the current project brand. New public descriptions call this the
+Lesson-assisted workflow. See [historical evidence](benchmarks/README.md).
+
+The approved GitHub target is `larhalt0515/retryloom`; that public rename has not
+been performed. The current public repository and origin remain
+[larhalt0515/reflex](https://github.com/larhalt0515/reflex).

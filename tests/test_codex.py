@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from reflex.adapters.codex import CodexAdapter
+from retryloom.adapters.codex import CodexAdapter
 
 
 @pytest.mark.parametrize("suffix", [".json", ".jsonl"])

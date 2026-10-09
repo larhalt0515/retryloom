@@ -12,9 +12,9 @@ import time
 from typing import Any
 from uuid import uuid4
 
-from reflex.git.repository import ensure_repository, repository_state
-from reflex.storage.database import initialize_schema
-from reflex.storage.repository import save_replay
+from retryloom.git.repository import ensure_repository, repository_state
+from retryloom.storage.database import initialize_schema
+from retryloom.storage.repository import save_replay
 from .checks import run_check
 from .injection import FrozenLesson, instructions_for
 from .isolation import OwnedDirectory, baseline_environment, create_clone, git_command, run_environment
@@ -225,7 +225,7 @@ class ReplayEngine:
             lexical = Path(filename).absolute()
             # SQLite may canonicalize its filename when opening a symlink. Check
             # the administrative spelling too so that evidence is not lost.
-            administrative = source / ".reflex" / "reflex.db"
+            administrative = source / ".retryloom" / "retryloom.db"
             if ((administrative.is_symlink() or administrative.parent.is_symlink()) and
                 administrative.resolve() == lexical.resolve()):
                 raise InvalidComparison("administrative database file or parent is a symlink")
@@ -248,8 +248,8 @@ class ReplayEngine:
             if not path.is_relative_to(source):
                 continue
             relative = path.relative_to(source)
-            if relative != Path(".reflex/reflex.db"):
-                raise InvalidComparison("in-source replay database must be the ignored .reflex/reflex.db administrative file")
+            if relative != Path(".retryloom/retryloom.db"):
+                raise InvalidComparison("in-source replay database must be the ignored .retryloom/retryloom.db administrative file")
             names = [str(relative) + suffix for suffix in ("", "-wal", "-shm", "-journal")]
             if git_command(source, env, "--literal-pathspecs", "ls-files", "-z", "--", *names):
                 raise InvalidComparison("in-source replay database or sidecar is tracked")
@@ -257,7 +257,7 @@ class ReplayEngine:
                 try:
                     git_command(source, env, "check-ignore", "--no-index", "--", name)
                 except RuntimeError as error:
-                    raise InvalidComparison("in-source .reflex database and sidecars must be Gitignored") from error
+                    raise InvalidComparison("in-source .retryloom database and sidecars must be Gitignored") from error
             administrative_paths.extend(source / name for name in names)
         return tuple(administrative_paths)
 
@@ -291,7 +291,7 @@ class ReplayEngine:
         if row is None:
             raise InvalidComparison("replay lesson must already exist in local storage")
         # Phase8 snapshots bind scope, refs, and audit as well as injected text.
-        from reflex.storage.repository import verify_managed_lesson
+        from retryloom.storage.repository import verify_managed_lesson
         managed = verify_managed_lesson(self.connection, plan.lesson_id)
         if managed is not None and (managed.status == "rejected" or managed.audit.status == "REJECT"):
             raise InvalidComparison("stored managed lesson is rejected")
@@ -321,7 +321,7 @@ class ReplayEngine:
             raise InvalidComparison("automatic checks require nonempty executable commands")
         for timeout in (plan.control_timeout_seconds, plan.reflex_timeout_seconds):
             if timeout is not None and timeout != plan.timeout_seconds:
-                raise InvalidComparison("control and reflex timeouts must equal the common timeout")
+                raise InvalidComparison("control and retryloom timeouts must equal the common timeout")
         # Require a deterministic serializable configuration before starting processes.
         json.dumps(plan.model_settings, sort_keys=True, allow_nan=False)
 
@@ -431,5 +431,5 @@ class ReplayEngine:
         return ReplayRun(id=str(uuid4()), condition=condition, run_number=number,
                          result=result, checks=checks, status=statuses[0], statuses=statuses, seed=seed,
                          metadata={"manifest_hash": manifest_hash, "tool_environment_keys": tool_env_keys,
-                                   "seed_policy": "paired run index; PYTHONHASHSEED and REFLEX_RUN_SEED",
+                                   "seed_policy": "paired run index; PYTHONHASHSEED and RETRYLOOM_RUN_SEED",
                                    "base_commit": commit, "total_elapsed_seconds": time.monotonic() - start})

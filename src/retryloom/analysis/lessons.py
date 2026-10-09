@@ -4,8 +4,8 @@ import json
 import unicodedata
 from collections.abc import Sequence
 
-from reflex.models import CorrectionEvidence, Lesson, LessonAudit, LessonEvidenceRef, LessonTrigger
-from reflex.replay.injection import FrozenLesson
+from retryloom.models import CorrectionEvidence, Lesson, LessonAudit, LessonEvidenceRef, LessonTrigger
+from retryloom.replay.injection import FrozenLesson
 
 TEMPLATES = {
     "test_failure": "When a test fails in this repository, inspect the failing check, make a focused correction, and rerun the same check before reporting success.",

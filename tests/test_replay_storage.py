@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 
-from reflex.storage.database import connect, initialize_schema
+from retryloom.storage.database import connect, initialize_schema
 
 
 def test_v1_database_migrates_preserving_existing_data(tmp_path):
@@ -35,7 +35,7 @@ def test_unknown_database_version_rejected_without_writes(tmp_path):
 
 
 def test_failed_migration_rolls_back_schema(tmp_path, monkeypatch):
-    import reflex.storage.database as module
+    import retryloom.storage.database as module
     database = sqlite3.connect(tmp_path / "rollback.db")
     database.executescript("CREATE TABLE metadata(key TEXT PRIMARY KEY,value TEXT); INSERT INTO metadata VALUES('schema_version','1');")
     monkeypatch.setattr(module, "SCHEMA_SQL", "CREATE TABLE should_rollback(id INTEGER); INVALID SQL;")

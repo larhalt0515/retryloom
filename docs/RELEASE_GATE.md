@@ -1,4 +1,4 @@
-# Reflex v0.1 Release Gate
+# Retryloom v0.1 Release Gate
 
 This gate has exactly 14 items, in the order defined by the v0.1 specification.
 Gates 1–4 and 9 require evidence from the selected real-agent release case.
@@ -50,8 +50,9 @@ are both **INFRASTRUCTURE BLOCKED** in the current environment. This is a
 validation gap, not evidence of an implementation failure, and it does not turn
 any of Gates 1–4 or 9 into PASS. These are unvalidated requirements, not demonstrated implementation failures.
 
-CI completion and authenticated live integration remain separate follow-up
-work. A future release review must reassess every item against its real release
+[CI passed all four jobs](https://github.com/larhalt0515/reflex/actions/runs/37793077910) on original candidate commit `69d939757646bf12645e05d349539acd2eedca3c`.
+The local rename still requires remote CI after an approved push. Authenticated
+live integration remains separate follow-up work. A future release review must reassess every item against its real release
 case evidence; this document does not approve a release or waive a failed gate.
 
 ## Local implementation closure
@@ -60,12 +61,12 @@ The existing components are now connected through Init/Learn/Replay CLI, with
 explicit agent execution, unchanged Lesson lifecycle and deterministic fixture
 coverage. [CLI regression tests](../tests/test_release_cli.py) exercise canonical
 synthetic import through Stats, candidate provenance, isolation, baseline and
-error handling. [CI](../.github/workflows/tests.yml) is configured locally; remote
-execution and real provider validation remain separate. All real-case Gates must
+error handling. [CI](../.github/workflows/tests.yml) passed remotely for the original
+candidate; renamed-code CI and real provider validation remain separate. All real-case Gates must
 be reassessed after the [external procedure](FOLLOW_UP.md); local tests do not
 prove measured real-agent improvement.
 
 Closure validation: 64 focused tests and 440 deterministic tests from a fresh
 wheel installation passed. No concrete HIGH/BLOCKER remains in the bounded
-independent CLI review. Authenticated Codex/Claude and remote CI were not run;
-these test results do not close real-agent evidence or improvement requirements.
+independent CLI review. Authenticated Codex/Claude have not been validated.
+The original remote CI success does not close real-agent evidence or improvement requirements.

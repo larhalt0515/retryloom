@@ -1,7 +1,7 @@
 """Select bounded correction/success evidence from canonical sessions only."""
 import re
 
-from reflex.models import CorrectionEvidence, FailureEvent, Session
+from retryloom.models import CorrectionEvidence, FailureEvent, Session
 from .failures import BUILD_COMMAND, CORRECTION, TEST_COMMAND
 
 OUTPUT_TYPES = {"tool_result", "function_call_output", "custom_tool_call_output", "command_result"}

@@ -1,6 +1,6 @@
 import json
 import pytest
-from reflex.adapters.claude import ClaudeAdapter
+from retryloom.adapters.claude import ClaudeAdapter
 
 
 def parse(tmp_path, records, suffix='.jsonl'):
@@ -72,10 +72,10 @@ def test_explicit_outcome(tmp_path,outcome):
 
 
 def test_storage_uses_same_tables(tmp_path):
-    from reflex.storage.database import connect
-    from reflex.storage.repository import save_session
+    from retryloom.storage.database import connect
+    from retryloom.storage.repository import save_session
     s=parse(tmp_path,[rec(cwd='/workspace/example',version='1.2',git={'commit_hash':'a'*40},message={'content':'Task'}),rec('assistant',message={'model':'claude-new','usage':{'input_tokens':9,'output_tokens':3,'cache_read_input_tokens':50}})])
-    with connect(tmp_path/'reflex.db') as db:
+    with connect(tmp_path/'retryloom.db') as db:
         save_session(db,s)
         save_session(db,s)
         row=db.execute('SELECT * FROM sessions').fetchone()
@@ -88,8 +88,8 @@ def test_storage_uses_same_tables(tmp_path):
 def test_scan_repository_scope_and_duplicate(tmp_path):
     import subprocess
     from typer.testing import CliRunner
-    from reflex.main import app
-    from reflex.storage.database import connect
+    from retryloom.main import app
+    from retryloom.storage.database import connect
     a=tmp_path/'a';b=tmp_path/'b';a.mkdir();b.mkdir()
     for root in [a,b]:subprocess.run(['git','init',str(root)],check=True,capture_output=True)
     source=tmp_path/'transcripts';source.mkdir()
@@ -100,14 +100,14 @@ def test_scan_repository_scope_and_duplicate(tmp_path):
     assert 'Imported: 1' in first.output
     second=CliRunner().invoke(app,args);assert second.exit_code==0
     assert 'Imported: 0' in second.output
-    with connect(a/'.reflex/reflex.db') as db:
+    with connect(a/'.retryloom/retryloom.db') as db:
         assert db.execute('SELECT id FROM sessions').fetchall()[0][0]=='first'
         assert db.execute('SELECT count(*) FROM sessions').fetchone()[0]==1
 
 
 def test_cross_adapter_equivalent_task_tools_metrics(tmp_path):
-    from reflex.adapters.codex import CodexAdapter
-    from reflex.analysis.failures import detect_failure
+    from retryloom.adapters.codex import CodexAdapter
+    from retryloom.analysis.failures import detect_failure
     task='Repair a parser.'
     claude=parse(tmp_path,[rec(cwd='/workspace/example',message={'content':task}),rec('assistant',message={'id':'api1','usage':{'input_tokens':10,'output_tokens':5},'content':[{'type':'tool_use','id':'call','name':'Bash','input':{'command':'pytest'}}]}),rec(message={'content':[{'type':'tool_result','tool_use_id':'call','content':'Exit code 1\nfailed','is_error':True,'exit_code':1}]}),rec(message={'content':'Please fix the validation instead of ignoring it.'})])
     records=[{'type':'session_meta','payload':{'id':'codex-invented','cwd':'/workspace/example','timestamp':'2026-01-01T00:00:00Z'}},{'type':'event_msg','payload':{'type':'user_message','message':task}},{'type':'response_item','payload':{'type':'function_call','call_id':'call','name':'shell','arguments':json.dumps({'cmd':'pytest'})}},{'type':'response_item','payload':{'type':'function_call_output','call_id':'call','exit_code':1,'content':'failed'}},{'type':'event_msg','payload':{'type':'user_message','message':'Please fix the validation instead of ignoring it.'}},{'type':'event_msg','payload':{'type':'token_count','info':{'total_token_usage':{'input_tokens':10,'output_tokens':5}}}}]
@@ -129,18 +129,18 @@ def test_stale_cost_state_does_not_override_later_usage(tmp_path):
 def test_scan_preserves_existing_agent_and_source(tmp_path):
     import subprocess
     from typer.testing import CliRunner
-    from reflex.main import app
-    from reflex.storage.database import connect
-    from reflex.storage.repository import save_session
+    from retryloom.main import app
+    from retryloom.storage.database import connect
+    from retryloom.storage.repository import save_session
     repo=tmp_path/'repo';repo.mkdir();subprocess.run(['git','init',str(repo)],check=True,capture_output=True)
     sub=repo/'nested';sub.mkdir();source=tmp_path/'source';source.mkdir()
     path=source/'one.jsonl';path.write_text(json.dumps(rec(cwd=str(sub),message={'content':'Synthetic task'})))
     before=path.read_bytes()
     original=ClaudeAdapter(source).parse(path).model_copy(update={'agent':'codex'})
-    with connect(repo/'.reflex/reflex.db') as db:save_session(db,original)
+    with connect(repo/'.retryloom/retryloom.db') as db:save_session(db,original)
     result=CliRunner().invoke(app,['scan','--agent','claude','--source-root',str(source),'--repository',str(repo)])
     assert result.exit_code==0 and 'Imported: 0' in result.output
-    with connect(repo/'.reflex/reflex.db') as db:assert db.execute('SELECT agent FROM sessions').fetchone()[0]=='codex'
+    with connect(repo/'.retryloom/retryloom.db') as db:assert db.execute('SELECT agent FROM sessions').fetchone()[0]=='codex'
     assert path.read_bytes()==before
 
 
